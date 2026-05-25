@@ -26,9 +26,14 @@ build/
 *.sqlite3
 *.db
 fund_api_cache.sqlite
+fund_data.db
 
 # Generated files
 *.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
 *.html
 *.txt
 !requirements.txt
@@ -45,13 +50,13 @@ Thumbs.db
 # Node
 node_modules/
 .npm
-
-# Build
 .next/
 out/
 
 # Trae
 .trae/
 
-# Submodule (keep as reference)
-# real-time-fund/
+# real-time-fund node_modules
+real-time-fund/node_modules/
+real-time-fund/.next/
+real-time-fund/out/
