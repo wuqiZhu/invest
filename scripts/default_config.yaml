@@ -1,0 +1,112 @@
+# 系统默认配置
+# 请勿修改此文件，如需自定义请修改 user_config.yaml
+
+# 基金列表
+funds:
+  - code: "110011"
+    name: "易方达中小盘混合"
+    monthly_invest: 200
+    enabled: true
+  - code: "161725"
+    name: "招商中证白酒指数"
+    monthly_invest: 300
+    enabled: true
+
+# 预警配置
+alert:
+  daily_drop_threshold: -3
+  weekly_drop_threshold: -8
+  overbought_threshold: 5
+  oversold_threshold: -5
+
+# 分析配置
+analysis:
+  default_days: 365
+  ma_periods: [5, 10, 20, 60]
+  rsi_period: 14
+  bollinger_period: 20
+  risk_free_rate: 0.03
+
+# 回测配置
+backtest:
+  initial_capital: 10000
+  short_ma: 5
+  long_ma: 20
+  commission: 0.0015
+  slippage: 0.001
+  plot_enabled: true
+
+# 数据源配置
+data_source:
+  primary: eastmoney
+  fallback_enabled: true
+  request_timeout: 15
+  max_retries: 3
+  request_interval: 1
+
+# 数据库配置
+database:
+  path: "fund_data.db"
+  backup_enabled: true
+  backup_retention_days: 30
+
+# 通知配置
+notification:
+  enabled: false
+  method: "console"
+  wechat:
+    webhook_url: ""
+  dingtalk:
+    webhook_url: ""
+    secret: ""
+  email:
+    smtp_server: "smtp.qq.com"
+    smtp_port: 587
+    sender_email: ""
+    sender_password: ""
+    receiver_email: ""
+
+# 输出配置
+output:
+  show_chart: false
+  chart_dir: "."
+  chart_dpi: 300
+  report_dir: "."
+
+# 新闻情绪 API 配置
+news_api:
+  enabled: false
+  host: "0.0.0.0"
+  port: 5000
+  api_key: ""
+
+# 行为约束配置
+behavioral:
+  cool_down_days: 3
+  max_trades_per_month: 2
+  require_reflection: true
+
+# 交易系统配置
+trading_system:
+  trend:
+    ema_short: 20
+    ema_long: 60
+    ma_long: 120
+    timeframe: "daily"
+  entry:
+    use_ema_deviation: true
+    deviation_threshold: -5
+    use_macd_golden_cross: true
+  volatility:
+    volatility_period: 60
+    min_volatility: 10
+    max_volatility: 30
+    bb_width_threshold: 0.1
+  risk:
+    max_drawdown_pause: 15
+    pause_months: 1
+    max_loss_percent: 0.02
+  profit:
+    target_return: 20
+    trailing_stop_drawdown: 8
+    half_profit_trigger: 15

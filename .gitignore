@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+*.env.local
+
+# Database and Cache
+*.sqlite
+*.sqlite3
+*.db
+fund_api_cache.sqlite
+
+# Generated files
+*.png
+*.html
+*.txt
+!requirements.txt
+!README.md
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+.npm
+
+# Build
+.next/
+out/
+
+# Trae
+.trae/
+
+# Submodule (keep as reference)
+# real-time-fund/

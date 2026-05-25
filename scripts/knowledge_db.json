@@ -1,0 +1,326 @@
+{
+  "books": [
+    {
+      "title": "The Intelligent Investor",
+      "author": "Benjamin Graham",
+      "year": 1949,
+      "level": "经典",
+      "focus": "价值投资",
+      "key_points": [
+        "安全边际",
+        "市场先生",
+        "防御型投资者"
+      ],
+      "recommended": true
+    },
+    {
+      "title": "A Random Walk Down Wall Street",
+      "author": "Burton Malkiel",
+      "year": 1973,
+      "level": "入门",
+      "focus": "指数投资",
+      "key_points": [
+        "有效市场假说",
+        "随机漫步",
+        "指数基金"
+      ],
+      "recommended": true
+    },
+    {
+      "title": "One Up On Wall Street",
+      "author": "Peter Lynch",
+      "year": 1989,
+      "level": "进阶",
+      "focus": "选股策略",
+      "key_points": [
+        "十倍股",
+        "六种股票分类",
+        "实地调研"
+      ],
+      "recommended": true
+    },
+    {
+      "title": "Common Stocks and Uncommon Profits",
+      "author": "Philip Fisher",
+      "year": 1958,
+      "level": "进阶",
+      "focus": "成长投资",
+      "key_points": [
+        "SCUTTLEBUTT方法",
+        "15要点清单",
+        "长期持有"
+      ],
+      "recommended": true
+    },
+    {
+      "title": "The Little Book of Common Sense Investing",
+      "author": "John Bogle",
+      "year": 2007,
+      "level": "入门",
+      "focus": "指数投资",
+      "key_points": [
+        "低成本",
+        "长期投资",
+        "复利效应"
+      ],
+      "recommended": true
+    },
+    {
+      "title": "Thinking, Fast and Slow",
+      "author": "Daniel Kahneman",
+      "year": 2011,
+      "level": "心理学",
+      "focus": "行为金融",
+      "key_points": [
+        "系统1和系统2",
+        "损失厌恶",
+        "锚定效应"
+      ],
+      "recommended": true
+    },
+    {
+      "title": "The Psychology of Money",
+      "author": "Morgan Housel",
+      "year": 2020,
+      "level": "入门",
+      "focus": "理财心理",
+      "key_points": [
+        "复利思维",
+        "尾部风险",
+        "财富与幸福"
+      ],
+      "recommended": true
+    },
+    {
+      "title": "Margin of Safety",
+      "author": "Seth Klarman",
+      "year": 1991,
+      "level": "高级",
+      "focus": "价值投资",
+      "key_points": [
+        "安全边际",
+        "逆向投资",
+        "风险厌恶"
+      ],
+      "recommended": false
+    },
+    {
+      "title": "穷查理宝典",
+      "author": "查理·芒格",
+      "year": 2005,
+      "level": "进阶",
+      "focus": "多元思维",
+      "key_points": [
+        "多元思维模型",
+        "逆向思维",
+        "能力圈"
+      ],
+      "recommended": true
+    },
+    {
+      "title": "聪明的投资者",
+      "author": "本杰明·格雷厄姆",
+      "year": 1949,
+      "level": "经典",
+      "focus": "价值投资",
+      "key_points": [
+        "安全边际",
+        "市场先生",
+        "防御型投资"
+      ],
+      "recommended": true
+    },
+    {
+      "title": "投资最重要的事",
+      "author": "霍华德·马克斯",
+      "year": 2011,
+      "level": "进阶",
+      "focus": "风险管理",
+      "key_points": [
+        "第二层思维",
+        "风险控制",
+        "市场周期"
+      ],
+      "recommended": true
+    },
+    {
+      "title": "漫步华尔街",
+      "author": "伯顿·马尔基尔",
+      "year": 1973,
+      "level": "入门",
+      "focus": "投资理论",
+      "key_points": [
+        "随机漫步",
+        "技术分析局限",
+        "基本面分析"
+      ],
+      "recommended": true
+    }
+  ],
+  "quotes": [
+    {
+      "author": "Warren Buffett",
+      "quote": "别人贪婪时我恐惧，别人恐惧时我贪婪。",
+      "context": "投资心态",
+      "source": "股东信"
+    },
+    {
+      "author": "Warren Buffett",
+      "quote": "投资的第一条规则是不要亏钱，第二条规则是不要忘记第一条。",
+      "context": "风险控制",
+      "source": "演讲"
+    },
+    {
+      "author": "Charlie Munger",
+      "quote": "反过来想，总是反过来想。",
+      "context": "逆向思维",
+      "source": "演讲"
+    },
+    {
+      "author": "Charlie Munger",
+      "quote": "在有鱼的地方钓鱼。",
+      "context": "选择机会",
+      "source": "演讲"
+    },
+    {
+      "author": "Peter Lynch",
+      "quote": "知道你拥有什么，以及你为什么拥有它。",
+      "context": "投资研究",
+      "source": "书籍"
+    },
+    {
+      "author": "Howard Marks",
+      "quote": "你不能通过做和其他所有人一样的事情来取得超额收益。",
+      "context": "逆向投资",
+      "source": "备忘录"
+    },
+    {
+      "author": "Howard Marks",
+      "quote": "最重要的事情不是进攻，而是防守。",
+      "context": "风险控制",
+      "source": "备忘录"
+    },
+    {
+      "author": "Benjamin Graham",
+      "quote": "市场短期是投票机，长期是称重机。",
+      "context": "市场本质",
+      "source": "书籍"
+    },
+    {
+      "author": "John Bogle",
+      "quote": "不要试图在干草堆里找针，买下整个干草堆。",
+      "context": "指数投资",
+      "source": "书籍"
+    },
+    {
+      "author": "George Soros",
+      "quote": "重要的不是你判断对了还是错了，而是你对的时候赚了多少，错的时候亏了多少。",
+      "context": "风险管理",
+      "source": "书籍"
+    },
+    {
+      "author": "Ray Dalio",
+      "quote": "如果你不敢持有一只股票10年，那就不要持有它10分钟。",
+      "context": "长期投资",
+      "source": "书籍"
+    },
+    {
+      "author": "李录",
+      "quote": "投资的本质是对未来做出有依据的预测。",
+      "context": "投资本质",
+      "source": "演讲"
+    },
+    {
+      "author": "张磊",
+      "quote": "在长期主义的道路上，与伟大格局观者同行。",
+      "context": "长期投资",
+      "source": "书籍"
+    }
+  ],
+  "warnings": [
+    {
+      "type": "广告",
+      "keywords": [
+        "保本保息",
+        "稳赚不赔",
+        "无风险高收益",
+        "保证收益",
+        "每日分红"
+      ],
+      "warning": "承诺保本或固定高收益的都是骗局",
+      "risk_level": "高"
+    },
+    {
+      "type": "传销",
+      "keywords": [
+        "拉人头",
+        "层级返利",
+        "动态收益",
+        "静态收益",
+        "分享赚钱"
+      ],
+      "warning": "需要发展下线的都是传销模式",
+      "risk_level": "极高"
+    },
+    {
+      "type": "诈骗",
+      "keywords": [
+        "内部消息",
+        "主力拉升",
+        "涨停板",
+        "老师带单",
+        "免费荐股"
+      ],
+      "warning": "声称有内部消息或保证涨停的都是诈骗",
+      "risk_level": "极高"
+    },
+    {
+      "type": "误导",
+      "keywords": [
+        "股神",
+        "翻倍",
+        "暴富",
+        "一夜暴富",
+        "快速致富"
+      ],
+      "warning": "过度承诺收益的都是误导",
+      "risk_level": "中"
+    },
+    {
+      "type": "误导",
+      "keywords": [
+        "百分百",
+        "包赚",
+        "必涨",
+        "只涨不跌",
+        "零风险"
+      ],
+      "warning": "绝对化表述通常不可信",
+      "risk_level": "中"
+    },
+    {
+      "type": "庞氏",
+      "keywords": [
+        "高额回报",
+        "短期翻倍",
+        "资金盘",
+        "互助盘",
+        "拆分盘"
+      ],
+      "warning": "承诺高额短期回报的很可能是庞氏骗局",
+      "risk_level": "极高"
+    },
+    {
+      "type": "虚假",
+      "keywords": [
+        "官方认证",
+        "银行托管",
+        "保险公司担保",
+        "政府背景",
+        "国企背景"
+      ],
+      "warning": "虚假背书，需要核实官方信息",
+      "risk_level": "高"
+    }
+  ]
+}

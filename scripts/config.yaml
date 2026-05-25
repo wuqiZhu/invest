@@ -1,0 +1,93 @@
+alert:
+  daily_drop_threshold: -3.0
+  overbought_threshold: 5
+  oversold_threshold: -5
+  weekly_drop_threshold: -8
+analysis:
+  bollinger_period: 20
+  default_days: 365
+  ma_periods:
+  - 5
+  - 10
+  - 20
+  - 60
+  risk_free_rate: 0.03
+  rsi_period: 14
+backtest:
+  commission: 0.0015
+  initial_capital: 10000
+  long_ma: 20
+  plot_enabled: true
+  short_ma: 5
+  slippage: 0.001
+behavioral:
+  cool_down_days: 3
+  max_trades_per_month: 2
+  require_reflection: true
+data_source:
+  # 主数据源: eastmoney, sina, tencent, akshare
+  # akshare需要Python 3.9+，更稳定但依赖较重
+  primary: eastmoney
+  fallback_enabled: true
+  request_timeout: 15
+  max_retries: 3
+  request_interval: 1
+database:
+  backup_enabled: true
+  backup_retention_days: 30
+  path: fund_data.db
+funds:
+- code: '110011'
+  enabled: true
+  monthly_invest: 200
+  name: 易方达中小盘混合
+- code: '161725'
+  enabled: true
+  monthly_invest: 300
+  name: 招商中证白酒指数
+- code: '110020'
+  enabled: true
+  monthly_invest: 0
+  name: 易方达沪深300ETF联接
+notification:
+  email:
+    receiver_email: ''
+    sender_email: ''
+    sender_password: ''
+    smtp_port: 587
+    smtp_server: smtp.qq.com
+  enabled: true
+  method: dingtalk
+  wechat:
+    webhook_url: ''
+  dingtalk:
+    webhook_url: "https://oapi.dingtalk.com/robot/send?access_token=4eddf015bd886dc7e21b78b38633a446864aeca567528933944b602e9b6b573c"
+    secret: "SEC1d7d2429af6ef1fd0890220a1c468181ff2818104b67474ebb9fd027763a64ae"
+output:
+  chart_dir: .
+  chart_dpi: 300
+  report_dir: .
+  show_chart: false
+trading_system:
+  entry:
+    deviation_threshold: -5
+    use_ema_deviation: true
+    use_macd_golden_cross: true
+  profit:
+    half_profit_trigger: 15
+    target_return: 20
+    trailing_stop_drawdown: 8
+  risk:
+    max_drawdown_pause: 15
+    max_loss_percent: 0.02
+    pause_months: 1
+  trend:
+    ema_long: 60
+    ema_short: 20
+    ma_long: 120
+    timeframe: daily
+  volatility:
+    bb_width_threshold: 0.1
+    max_volatility: 30
+    min_volatility: 10
+    volatility_period: 60
