@@ -61,8 +61,8 @@ notification:
   wechat:
     webhook_url: ''
   dingtalk:
-    webhook_url: "https://oapi.dingtalk.com/robot/send?access_token=4eddf015bd886dc7e21b78b38633a446864aeca567528933944b602e9b6b573c"
-    secret: "SEC1d7d2429af6ef1fd0890220a1c468181ff2818104b67474ebb9fd027763a64ae"
+    webhook_url: "${DINGTALK_WEBHOOK}"  # 从环境变量读取
+    secret: "${DINGTALK_SECRET}"  # 从环境变量读取
 output:
   chart_dir: .
   chart_dpi: 300
