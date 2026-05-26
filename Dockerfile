@@ -7,4 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY scripts/ ./scripts/
 
-CMD ["python", "scripts/main_cli.py", "--help"]
+EXPOSE 5000
+
+CMD ["python", "scripts/news_api_server.py"]
