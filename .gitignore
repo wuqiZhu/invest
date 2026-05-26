@@ -39,6 +39,11 @@ fund_data.db
 !requirements.txt
 !README.md
 
+# 允许real-time-fund的assets目录下的图片文件
+!real-time-fund/app/assets/*.svg
+!real-time-fund/app/assets/*.jpg
+!real-time-fund/app/assets/*.png
+
 # 敏感配置文件
 scripts/user_config.yaml
 scripts/config.yaml
