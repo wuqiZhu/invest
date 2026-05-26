@@ -1,0 +1,29 @@
+# 用户自定义配置
+# 复制此文件为 user_config.yaml 并填入你自己的配置
+# 其他配置将使用系统默认值（default_config.yaml）
+
+# 基金列表（修改为你自己的基金）
+funds:
+  - code: "基金代码"
+    name: "基金名称"
+    monthly_invest: 200
+    enabled: true
+  - code: "基金代码"
+    name: "基金名称"
+    monthly_invest: 300
+    enabled: true
+
+# 通知配置（配置你的钉钉机器人）
+notification:
+  enabled: true
+  method: "dingtalk"
+  dingtalk:
+    webhook_url: "https://oapi.dingtalk.com/robot/send?access_token=your_token"
+    secret: "your_secret"
+
+# 新闻情绪 API 配置（与 TrendRadar 项目对接）
+news_api:
+  enabled: true
+  host: "0.0.0.0"
+  port: 5000
+  api_key: "your_api_key"

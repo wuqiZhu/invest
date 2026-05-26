@@ -39,6 +39,15 @@ fund_data.db
 !requirements.txt
 !README.md
 
+# 敏感配置文件
+scripts/user_config.yaml
+scripts/config.yaml
+投资整体方案.md
+
+# 数据文件
+knowledge_db.json
+real-time-fund/doc/fund_tracking_targets.csv
+
 # Logs
 logs/
 *.log
@@ -52,6 +61,9 @@ node_modules/
 .npm
 .next/
 out/
+
+# Vercel
+real-time-fund/.vercel/
 
 # Trae
 .trae/
