@@ -97,6 +97,10 @@ class FundNotifier:
             print("未配置钉钉webhook")
             return False
         
+        # 确保消息包含关键词"通知"（钉钉机器人安全设置要求）
+        if "通知" not in content:
+            content = f"通知：{content}"
+        
         if secret:
             timestamp = str(round(time.time() * 1000))
             string_to_sign = f'{timestamp}\n{secret}'
