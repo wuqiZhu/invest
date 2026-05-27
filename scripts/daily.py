@@ -19,10 +19,11 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from main_cli import FundInvestmentCLI
+from fund_notifier import FundNotifier
 
 
-def morning(cli, verbose=False, quiet=False, devil=False):
-    """每日晨报：简洁格式输出，整合signal"""
+def morning(cli, verbose=False, quiet=False, devil=False, notify=False):
+    """每日晨报：简洁格式输出，整合signal和止盈策略"""
     date_str = datetime.now().strftime('%Y-%m-%d')
 
     if verbose:
@@ -44,7 +45,10 @@ def morning(cli, verbose=False, quiet=False, devil=False):
         print(f"{date_str} 晨报")
 
     has_signal = False
+    has_important_signal = False
     signal_results = []
+    important_messages = []
+    
     for fund in enabled_funds:
         code = fund['code']
         name = fund.get('name', code)
@@ -53,8 +57,10 @@ def morning(cli, verbose=False, quiet=False, devil=False):
                 cli.fetcher.get_fund_nav(code), code
             )
             advice = cli.trading_system.get_advice(result)
+            signal = result.get('signal', 'HOLD')
             trend = result.get('modules', {}).get('trend', {}).get('status', 'unknown')
             vol = result.get('modules', {}).get('volatility', {}).get('status', 'unknown')
+            profit = result.get('modules', {}).get('profit', {}).get('status', 'hold')
 
             trend_str = "↑" if trend == "up" else "↓" if trend == "down" else "→"
             vol_str = "适中" if vol == "moderate" else "高" if vol == "high" else "低" if vol == "low" else vol
@@ -64,12 +70,18 @@ def morning(cli, verbose=False, quiet=False, devil=False):
                 'name': name,
                 'result': result,
                 'advice': advice,
+                'signal': signal,
                 'trend': trend,
                 'vol': vol,
+                'profit': profit,
                 'trend_str': trend_str,
                 'vol_str': vol_str
             })
 
+            if signal == 'SELL' or profit in ['trailing_stop', 'half_profit']:
+                has_important_signal = True
+                important_messages.append(f"{code} {name}：{advice}")
+            
             if "提高" in advice or "赎回" in advice or "暂停" in advice:
                 has_signal = True
                 if quiet:
@@ -86,6 +98,10 @@ def morning(cli, verbose=False, quiet=False, devil=False):
         print("今日无操作建议。")
     elif not has_signal and quiet:
         print(f"{date_str} 今日无重要信号。")
+
+    # 发送钉钉通知（仅在有重要信号时）
+    if notify and has_important_signal:
+        send_dingtalk_notification(important_messages, cli.config)
 
     # 魔鬼代言人模式
     if devil and signal_results:
@@ -123,6 +139,31 @@ def morning(cli, verbose=False, quiet=False, devil=False):
                 pass
 
         print(f"{'='*50}")
+
+
+def send_dingtalk_notification(messages, config):
+    """发送钉钉通知"""
+    try:
+        notifier = FundNotifier(config)
+        
+        notification_config = config.get('notification', {})
+        if notification_config.get('method') == 'dingtalk':
+            webhook_url = notification_config.get('dingtalk', {}).get('webhook_url')
+            secret = notification_config.get('dingtalk', {}).get('secret')
+            
+            if webhook_url:
+                content = f"📈 基金交易信号提醒\n\n{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                content += "\n".join(messages)
+                content += "\n\n⚠️ 以上信息仅供参考，不构成投资建议"
+                
+                notifier.send_dingtalk(content, webhook_url, secret)
+                print("\n✅ 钉钉通知已发送")
+            else:
+                print("\n⚠️ 未配置钉钉webhook，跳过通知")
+        else:
+            print("\n⚠️ 通知方式未设置为钉钉，跳过通知")
+    except Exception as e:
+        print(f"\n⚠️ 钉钉通知发送失败: {e}")
 
 
 def invest(cli, verbose=False):
@@ -268,6 +309,9 @@ def main():
   # 每日晨报（详细）
   python daily.py --morning --verbose
 
+  # 每日晨报（含钉钉通知）
+  python daily.py --morning --notify
+
   # 定投日记录
   python daily.py --invest
 
@@ -285,13 +329,14 @@ def main():
     parser.add_argument('--verbose', '-v', action='store_true', help='显示详细信息')
     parser.add_argument('--quiet', '-q', action='store_true', help='安静模式（只显示重要信号）')
     parser.add_argument('--devil', action='store_true', help='显示反面观点（魔鬼代言人模式）')
+    parser.add_argument('--notify', '-n', action='store_true', help='发送钉钉通知（仅在有重要信号时）')
 
     args = parser.parse_args()
 
     cli = FundInvestmentCLI(args.config)
 
     if args.morning:
-        morning(cli, verbose=args.verbose, quiet=args.quiet, devil=args.devil)
+        morning(cli, verbose=args.verbose, quiet=args.quiet, devil=args.devil, notify=args.notify)
     elif args.invest:
         invest(cli, verbose=args.verbose)
     elif args.review:
