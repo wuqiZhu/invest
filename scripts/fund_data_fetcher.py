@@ -81,16 +81,16 @@ class FundDataFetcher:
                                 unit_nav = float(matches[i+1].strip())
                                 total_nav = float(matches[i+2].strip())
                                 daily_return_str = matches[i+3].strip().replace('%', '')
-                                    daily_return = float(daily_return_str) if daily_return_str else 0
-                                    
-                                    records.append({
-                                        '日期': date_str,
-                                        '单位净值': unit_nav,
-                                        '累计净值': total_nav,
-                                        '日增长率': daily_return
-                                    })
-                                except (ValueError, IndexError):
-                                    continue
+                                daily_return = float(daily_return_str) if daily_return_str else 0
+                                
+                                records.append({
+                                    '日期': date_str,
+                                    '单位净值': unit_nav,
+                                    '累计净值': total_nav,
+                                    '日增长率': daily_return
+                                })
+                            except (ValueError, IndexError):
+                                continue
                 
                 if records:
                     df = pd.DataFrame(records)
