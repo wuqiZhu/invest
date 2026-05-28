@@ -62,22 +62,21 @@ class FundDataFetcher:
             response = self.session.get(url, params=params, timeout=15)
             response.encoding = 'utf-8'
             
-            # 解析数据
             data = response.text
             
-            # 提取表格数据
             records = []
             
-            # 使用正则表达式提取数据
-            pattern = r'<td>(.*?)</td>'
+            # 匹配带属性的td标签: <td class='tor bold'>5.1204</td>
+            pattern = r'<td[^>]*>(.*?)</td>'
             matches = re.findall(pattern, data)
             
             if len(matches) >= 4:
-                # 每4个td为一行：日期、单位净值、累计净值、日增长率
-                for i in range(0, len(matches), 4):
+                for i in range(0, len(matches), 7):
                     if i + 3 < len(matches):
                         try:
                             date_str = matches[i].strip()
+                            if not re.match(r'\d{4}-\d{2}-\d{2}', date_str):
+                                continue
                             unit_nav = float(matches[i+1].strip())
                             total_nav = float(matches[i+2].strip())
                             daily_return_str = matches[i+3].strip().replace('%', '')
@@ -99,7 +98,6 @@ class FundDataFetcher:
                 df = df.sort_index()
                 return df
             
-            # 备用方案：使用另一个接口
             return self._get_fund_nav_backup(fund_code, start_date, end_date)
                 
         except Exception as e:
