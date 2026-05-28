@@ -27,7 +27,10 @@ class Backtester:
 
         nav_data = self.fetcher.get_fund_nav(fund_code, start_date, end_date)
         if nav_data is None or nav_data.empty:
+            print(f"  {fund_code}: 无数据")
             return None
+
+        print(f"  {fund_code}: 获取到 {len(nav_data)} 条数据")
 
         navs = nav_data['单位净值'].values
         dates = nav_data.index.tolist()
