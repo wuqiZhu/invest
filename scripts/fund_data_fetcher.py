@@ -30,7 +30,7 @@ class FundDataFetcher:
         self.session = requests.Session()
         self.session.headers.update(self.headers)
     
-    def get_fund_nav(self, fund_code, start_date=None, end_date=None):
+    def get_fund_nav(self, fund_code, start_date=None, end_date=None, max_retries=3):
         """
         获取基金净值数据
         
@@ -38,6 +38,7 @@ class FundDataFetcher:
             fund_code: 基金代码
             start_date: 开始日期，默认为1年前
             end_date: 结束日期，默认为今天
+            max_retries: 最大重试次数
         
         Returns:
             DataFrame: 基金净值数据
@@ -47,62 +48,68 @@ class FundDataFetcher:
         if end_date is None:
             end_date = datetime.now().strftime('%Y-%m-%d')
         
-        try:
-            # 使用天天基金接口
-            url = f"https://fund.eastmoney.com/f10/F10DataApi.aspx"
-            params = {
-                'type': 'lsjz',
-                'code': fund_code,
-                'page': 1,
-                'sdate': start_date,
-                'edate': end_date,
-                'per': 20
-            }
-            
-            response = self.session.get(url, params=params, timeout=15)
-            response.encoding = 'utf-8'
-            
-            data = response.text
-            
-            records = []
-            
-            # 匹配带属性的td标签: <td class='tor bold'>5.1204</td>
-            pattern = r'<td[^>]*>(.*?)</td>'
-            matches = re.findall(pattern, data)
-            
-            if len(matches) >= 4:
-                for i in range(0, len(matches), 7):
-                    if i + 3 < len(matches):
-                        try:
-                            date_str = matches[i].strip()
-                            if not re.match(r'\d{4}-\d{2}-\d{2}', date_str):
-                                continue
-                            unit_nav = float(matches[i+1].strip())
-                            total_nav = float(matches[i+2].strip())
-                            daily_return_str = matches[i+3].strip().replace('%', '')
-                            daily_return = float(daily_return_str) if daily_return_str else 0
-                            
-                            records.append({
-                                '日期': date_str,
-                                '单位净值': unit_nav,
-                                '累计净值': total_nav,
-                                '日增长率': daily_return
-                            })
-                        except (ValueError, IndexError):
-                            continue
-            
-            if records:
-                df = pd.DataFrame(records)
-                df['日期'] = pd.to_datetime(df['日期'])
-                df = df.set_index('日期')
-                df = df.sort_index()
-                return df
-            
-            return self._get_fund_nav_backup(fund_code, start_date, end_date)
+        for attempt in range(max_retries):
+            try:
+                url = f"https://fund.eastmoney.com/f10/F10DataApi.aspx"
+                params = {
+                    'type': 'lsjz',
+                    'code': fund_code,
+                    'page': 1,
+                    'sdate': start_date,
+                    'edate': end_date,
+                    'per': 20
+                }
                 
-        except Exception as e:
-            print(f"获取基金 {fund_code} 数据失败: {e}")
-            return self._get_fund_nav_backup(fund_code, start_date, end_date)
+                timeout = 15 + attempt * 5
+                response = self.session.get(url, params=params, timeout=timeout)
+                response.encoding = 'utf-8'
+                
+                data = response.text
+                
+                records = []
+                
+                pattern = r'<td[^>]*>(.*?)</td>'
+                matches = re.findall(pattern, data)
+                
+                if len(matches) >= 4:
+                    for i in range(0, len(matches), 7):
+                        if i + 3 < len(matches):
+                            try:
+                                date_str = matches[i].strip()
+                                if not re.match(r'\d{4}-\d{2}-\d{2}', date_str):
+                                    continue
+                                unit_nav = float(matches[i+1].strip())
+                                total_nav = float(matches[i+2].strip())
+                                daily_return_str = matches[i+3].strip().replace('%', '')
+                                    daily_return = float(daily_return_str) if daily_return_str else 0
+                                    
+                                    records.append({
+                                        '日期': date_str,
+                                        '单位净值': unit_nav,
+                                        '累计净值': total_nav,
+                                        '日增长率': daily_return
+                                    })
+                                except (ValueError, IndexError):
+                                    continue
+                
+                if records:
+                    df = pd.DataFrame(records)
+                    df['日期'] = pd.to_datetime(df['日期'])
+                    df = df.set_index('日期')
+                    df = df.sort_index()
+                    return df
+                
+                if attempt < max_retries - 1:
+                    time.sleep(2)
+                    continue
+                return self._get_fund_nav_backup(fund_code, start_date, end_date)
+                    
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    time.sleep(2)
+                    continue
+                print(f"获取基金 {fund_code} 数据失败: {e}")
+                return self._get_fund_nav_backup(fund_code, start_date, end_date)
     
     def _get_fund_nav_backup(self, fund_code, start_date, end_date):
         """备用数据获取方案"""
