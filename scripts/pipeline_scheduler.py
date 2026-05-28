@@ -189,15 +189,18 @@ class PipelineScheduler:
             return {'status': 'skipped', 'message': '依赖不可用'}
 
         try:
-            news_data = {
+            # 构建分析报告
+            analysis_report = {
                 'sentiment_score': 0.72,
                 'keywords': ['央行降准', '半导体上涨', '消费回暖'],
-                'source': 'pipeline_scheduler'
+                'source': 'pipeline_scheduler',
+                'timestamp': datetime.now().isoformat()
             }
 
-            decisions = self.decision_engine.generate_decision_batch(news_data)
-            logger.info(f"生成 {len(decisions.get('decisions', []))} 个决策")
-            return decisions
+            # 使用正确的方法名 make_decision
+            decision = self.decision_engine.make_decision(analysis_report)
+            logger.info(f"决策结果: {decision}")
+            return decision
         except Exception as e:
             logger.error(f"决策生成失败: {e}")
             raise
