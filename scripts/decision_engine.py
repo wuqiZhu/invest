@@ -74,6 +74,37 @@ class DecisionEngine:
             except Exception:
                 pass
 
+    def _check_risk_control(self, fund_code):
+        if not self.fetcher:
+            return {'safe': True, 'drawdown': 0}
+
+        try:
+            fund_data = self.fetcher.get_fund_nav(fund_code, days=90)
+            if fund_data is None or fund_data.empty:
+                return {'safe': True, 'drawdown': 0}
+
+            navs = fund_data['单位净值'].values
+            if len(navs) < 10:
+                return {'safe': True, 'drawdown': 0}
+
+            peak = navs[0]
+            max_drawdown = 0
+            for nav in navs:
+                if nav > peak:
+                    peak = nav
+                drawdown = (peak - nav) / peak
+                if drawdown > max_drawdown:
+                    max_drawdown = drawdown
+
+            safe = max_drawdown < 0.15
+            return {
+                'safe': safe,
+                'drawdown': round(max_drawdown * 100, 2),
+                'message': f'最大回撤{max_drawdown*100:.1f}%' + ('，超过15%限制' if not safe else '')
+            }
+        except Exception:
+            return {'safe': True, 'drawdown': 0}
+
     def make_decision(self, analysis_report):
         """
         主决策流程
@@ -103,9 +134,15 @@ class DecisionEngine:
             momentum_data = self._calculate_momentum(fund_code)
             fund_indicators.update(momentum_data)
 
+            risk_check = self._check_risk_control(fund_code)
+
             decision_result = self._apply_decision_rules(
                 fund_indicators, tech_signals, similar_cases
             )
+
+            if not risk_check['safe'] and decision_result['action'] == 'buy':
+                decision_result['action'] = 'hold'
+                decision_result['reason'] += f', 风控: {risk_check["message"]}'
 
             decision = {
                 'batch_id': batch_id,

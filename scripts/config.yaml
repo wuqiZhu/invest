@@ -53,6 +53,18 @@ funds:
   enabled: true
   monthly_invest: 500
   name: 天弘中证机器人ETF联接C
+- code: '001156'
+  enabled: true
+  monthly_invest: 200
+  name: 申万菱信新能源汽车
+- code: '003095'
+  enabled: true
+  monthly_invest: 200
+  name: 中欧医疗健康混合
+- code: '005827'
+  enabled: true
+  monthly_invest: 200
+  name: 易方达蓝筹精选混合
 notification:
   email:
     receiver_email: ''
