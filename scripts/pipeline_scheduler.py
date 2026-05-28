@@ -86,6 +86,11 @@ class PipelineScheduler:
         }
 
         try:
+            # 步骤0: 更新净值
+            logger.info("步骤0: 更新基金净值")
+            step0_result = self._run_step('净值更新', self._step_update_nav)
+            results['steps'].append(step0_result)
+
             # 步骤1: 信息采集
             logger.info("步骤1: 信息采集")
             step1_result = self._run_step('采集', self._step_collect)
@@ -164,6 +169,24 @@ class PipelineScheduler:
             result['duration_seconds'] = round(end_time - start_time, 2)
 
         return result
+
+    def _step_update_nav(self) -> Dict[str, Any]:
+        """步骤0: 更新基金净值"""
+        logger.info("更新基金净值...")
+
+        try:
+            from update_nav import update_fund_nav
+            success_count = update_fund_nav()
+            return {
+                'status': 'success',
+                'updated_count': success_count
+            }
+        except Exception as e:
+            logger.error(f"净值更新失败: {e}")
+            return {
+                'status': 'failed',
+                'error': str(e)
+            }
 
     def _step_collect(self) -> Dict[str, Any]:
         """步骤1: 信息采集"""
