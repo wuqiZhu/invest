@@ -101,20 +101,25 @@ class PipelineScheduler:
             step2_result = self._run_step('分析', self._step_analyze)
             results['steps'].append(step2_result)
 
-            # 步骤3: 决策生成
-            logger.info("步骤3: 决策生成")
-            step3_result = self._run_step('决策', self._step_decide)
+            # 步骤3: 止盈止损检查
+            logger.info("步骤3: 止盈止损检查")
+            step3_result = self._run_step('止盈止损', self._step_check_risk)
             results['steps'].append(step3_result)
 
-            # 步骤4: 执行交易
-            logger.info("步骤4: 执行交易")
-            step4_result = self._run_step('执行', self._step_execute)
+            # 步骤4: 决策生成
+            logger.info("步骤4: 决策生成")
+            step4_result = self._run_step('决策', self._step_decide)
             results['steps'].append(step4_result)
 
-            # 步骤5: 发送通知
-            logger.info("步骤5: 发送通知")
-            step5_result = self._run_step('通知', self._step_notify)
+            # 步骤5: 执行交易
+            logger.info("步骤5: 执行交易")
+            step5_result = self._run_step('执行', self._step_execute)
             results['steps'].append(step5_result)
+
+            # 步骤6: 发送通知
+            logger.info("步骤6: 发送通知")
+            step6_result = self._run_step('通知', self._step_notify)
+            results['steps'].append(step6_result)
 
             results['status'] = 'success'
             self.pipeline_status['success_count'] += 1
@@ -204,8 +209,47 @@ class PipelineScheduler:
             'message': 'analyser 作为独立服务运行'
         }
 
+    def _step_check_risk(self) -> Dict[str, Any]:
+        """步骤3: 止盈止损检查"""
+        logger.info("检查止盈止损...")
+
+        if not LOCAL_IMPORTS:
+            return {'status': 'skipped', 'message': '依赖不可用'}
+
+        try:
+            alerts = self.execution_engine.check_take_profit_stop_loss(
+                take_profit=20,
+                stop_loss=-10
+            )
+            
+            if alerts:
+                logger.info(f"发现 {len(alerts)} 个止盈止损信号")
+                for alert in alerts:
+                    action = "止盈" if alert['action'] == 'take_profit' else "止损"
+                    logger.warning(
+                        f"{action}信号: {alert['fund_code']}, "
+                        f"盈亏比例: {alert['profit_rate']:.2f}%"
+                    )
+                return {
+                    'status': 'alerts',
+                    'alerts': alerts,
+                    'count': len(alerts)
+                }
+            else:
+                logger.info("未发现止盈止损信号")
+                return {
+                    'status': 'safe',
+                    'message': '所有基金在安全范围内'
+                }
+        except Exception as e:
+            logger.error(f"止盈止损检查失败: {e}")
+            return {
+                'status': 'error',
+                'error': str(e)
+            }
+
     def _step_decide(self) -> Dict[str, Any]:
-        """步骤3: 决策生成"""
+        """步骤4: 决策生成"""
         logger.info("生成投资决策...")
 
         if not LOCAL_IMPORTS:
@@ -229,7 +273,7 @@ class PipelineScheduler:
             raise
 
     def _step_execute(self) -> Dict[str, Any]:
-        """步骤4: 执行交易"""
+        """步骤5: 执行交易"""
         logger.info("执行交易...")
 
         if not LOCAL_IMPORTS:
@@ -248,7 +292,7 @@ class PipelineScheduler:
             raise
 
     def _step_notify(self) -> Dict[str, Any]:
-        """步骤5: 发送通知"""
+        """步骤6: 发送通知"""
         logger.info("发送通知...")
 
         if not REQUESTS_AVAILABLE:

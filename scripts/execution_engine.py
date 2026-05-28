@@ -373,6 +373,65 @@ class ExecutionEngine:
         """
         self.executor.write_execution(result)
 
+    def check_take_profit_stop_loss(self, take_profit=20, stop_loss=-10):
+        """
+        检查止盈止损
+
+        Args:
+            take_profit: 止盈比例（%）
+            stop_loss: 止损比例（%）
+
+        Returns:
+            list: 需要操作的基金列表
+        """
+        if not self.db:
+            return []
+
+        try:
+            records = self.db.get_invest_records()
+            if records is None or records.empty:
+                return []
+
+            alerts = []
+            for fund_code in records['fund_code'].unique():
+                fund_records = records[records['fund_code'] == fund_code]
+                last = fund_records.iloc[-1]
+                total_shares = last.get('total_shares', 0)
+                total_invested = last.get('total_invested', 0)
+
+                if total_shares <= 0 or total_invested <= 0:
+                    continue
+
+                current_nav = self._get_current_nav(fund_code)
+                if not current_nav or current_nav <= 0:
+                    continue
+
+                current_value = total_shares * current_nav
+                profit_rate = (current_value - total_invested) / total_invested * 100
+
+                if profit_rate >= take_profit:
+                    alerts.append({
+                        'fund_code': fund_code,
+                        'action': 'take_profit',
+                        'profit_rate': round(profit_rate, 2),
+                        'current_value': round(current_value, 2),
+                        'total_invested': round(total_invested, 2),
+                        'message': f'{fund_code} 盈利{profit_rate:.1f}%，建议止盈'
+                    })
+                elif profit_rate <= stop_loss:
+                    alerts.append({
+                        'fund_code': fund_code,
+                        'action': 'stop_loss',
+                        'profit_rate': round(profit_rate, 2),
+                        'current_value': round(current_value, 2),
+                        'total_invested': round(total_invested, 2),
+                        'message': f'{fund_code} 亏损{profit_rate:.1f}%，建议止损'
+                    })
+
+            return alerts
+        except Exception:
+            return []
+
     def get_portfolio_summary(self):
         """
         获取当前持仓汇总（使用实时净值计算）
