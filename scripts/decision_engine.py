@@ -99,8 +99,12 @@ class DecisionEngine:
             similar_cases = self._query_similar_cases(indicators)
             tech_signals = self._get_technical_signals(fund_code)
 
+            fund_indicators = dict(indicators)
+            momentum_data = self._calculate_momentum(fund_code)
+            fund_indicators.update(momentum_data)
+
             decision_result = self._apply_decision_rules(
-                indicators, tech_signals, similar_cases
+                fund_indicators, tech_signals, similar_cases
             )
 
             decision = {
@@ -194,6 +198,58 @@ class DecisionEngine:
         except Exception:
             return {'signal': 'HOLD', 'available': False}
 
+    def _calculate_momentum(self, fund_code):
+        if not self.fetcher:
+            return {'momentum_score': 0.5, 'volatility_score': 0.5}
+
+        try:
+            fund_data = self.fetcher.get_fund_nav(fund_code, days=60)
+            if fund_data is None or fund_data.empty:
+                return {'momentum_score': 0.5, 'volatility_score': 0.5}
+
+            navs = fund_data['单位净值'].values
+            if len(navs) < 10:
+                return {'momentum_score': 0.5, 'volatility_score': 0.5}
+
+            current = navs[-1]
+            ma5 = navs[-5:].mean()
+            ma10 = navs[-10:].mean()
+            ma20 = navs[-20:].mean() if len(navs) >= 20 else navs.mean()
+
+            momentum_score = 0.5
+            if current > ma5 > ma10 > ma20:
+                momentum_score = 0.8
+            elif current > ma5 > ma10:
+                momentum_score = 0.7
+            elif current > ma5:
+                momentum_score = 0.6
+            elif current < ma5 < ma10 < ma20:
+                momentum_score = 0.2
+            elif current < ma5 < ma10:
+                momentum_score = 0.3
+            elif current < ma5:
+                momentum_score = 0.4
+
+            returns = [(navs[i] - navs[i-1]) / navs[i-1] for i in range(1, len(navs))]
+            volatility = (sum(r**2 for r in returns) / len(returns)) ** 0.5
+
+            volatility_score = 0.5
+            if volatility < 0.005:
+                volatility_score = 0.7
+            elif volatility < 0.01:
+                volatility_score = 0.6
+            elif volatility > 0.03:
+                volatility_score = 0.3
+            elif volatility > 0.02:
+                volatility_score = 0.4
+
+            return {
+                'momentum_score': momentum_score,
+                'volatility_score': volatility_score
+            }
+        except Exception:
+            return {'momentum_score': 0.5, 'volatility_score': 0.5}
+
     def _apply_decision_rules(self, indicators, tech_signals, similar_cases):
         sentiment = indicators.get('sentiment_score', 0.5)
         keyword = indicators.get('keyword_score', 0.5)
@@ -204,6 +260,9 @@ class DecisionEngine:
             tech_score = 0.8
         elif tech_signal == 'SELL':
             tech_score = 0.2
+
+        momentum_score = indicators.get('momentum_score', 0.5)
+        volatility_score = indicators.get('volatility_score', 0.5)
 
         history_score = 0.5
         historical_match = False
@@ -222,10 +281,12 @@ class DecisionEngine:
                 history_score = min(max(0.5 + avg_profit * 5, 0), 1)
 
         composite = (
-            sentiment * WEIGHT_SENTIMENT +
-            tech_score * WEIGHT_TECHNICAL +
-            history_score * WEIGHT_HISTORY +
-            keyword * WEIGHT_KEYWORD
+            sentiment * 0.25 +
+            tech_score * 0.25 +
+            momentum_score * 0.20 +
+            volatility_score * 0.10 +
+            history_score * 0.10 +
+            keyword * 0.10
         )
 
         if composite > BUY_THRESHOLD:
