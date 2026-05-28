@@ -40,6 +40,7 @@ class Backtester:
 
         capital = initial_capital
         shares = 0
+        avg_cost = 0
         trades = []
         equity_curve = []
 
@@ -87,9 +88,30 @@ class Backtester:
                 'total_value': total_value
             })
 
-            if composite > 0.65 and capital > 100:
-                buy_amount = min(capital * 0.3, 500)
+            profit_rate = (current_nav - avg_cost) / avg_cost if avg_cost > 0 and shares > 0 else 0
+
+            if shares > 0 and profit_rate > 0.05:
+                sell_shares = shares * 0.5
+                sell_amount = sell_shares * current_nav
+                shares -= sell_shares
+                capital += sell_amount
+                if shares == 0:
+                    avg_cost = 0
+                trades.append({
+                    'date': dates[i].strftime('%Y-%m-%d'),
+                    'action': 'take_profit',
+                    'nav': current_nav,
+                    'shares': sell_shares,
+                    'amount': sell_amount,
+                    'profit_rate': round(profit_rate * 100, 2)
+                })
+            elif composite > 0.58 and capital > 100:
+                buy_amount = min(capital * 0.5, 1000)
                 buy_shares = buy_amount / current_nav
+                if shares > 0:
+                    avg_cost = (avg_cost * shares + current_nav * buy_shares) / (shares + buy_shares)
+                else:
+                    avg_cost = current_nav
                 shares += buy_shares
                 capital -= buy_amount
                 trades.append({
@@ -100,12 +122,13 @@ class Backtester:
                     'amount': buy_amount,
                     'composite': composite
                 })
-
-            elif composite < 0.35 and shares > 0:
+            elif composite < 0.40 and shares > 0:
                 sell_shares = shares * 0.5
                 sell_amount = sell_shares * current_nav
                 shares -= sell_shares
                 capital += sell_amount
+                if shares == 0:
+                    avg_cost = 0
                 trades.append({
                     'date': dates[i].strftime('%Y-%m-%d'),
                     'action': 'sell',
