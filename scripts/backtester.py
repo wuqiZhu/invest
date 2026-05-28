@@ -90,7 +90,7 @@ class Backtester:
 
             profit_rate = (current_nav - avg_cost) / avg_cost if avg_cost > 0 and shares > 0 else 0
 
-            if shares > 0 and profit_rate > 0.05:
+            if shares > 0 and profit_rate > 0.08:
                 sell_shares = shares * 0.5
                 sell_amount = sell_shares * current_nav
                 shares -= sell_shares
@@ -105,8 +105,8 @@ class Backtester:
                     'amount': sell_amount,
                     'profit_rate': round(profit_rate * 100, 2)
                 })
-            elif composite > 0.58 and capital > 100:
-                buy_amount = min(capital * 0.5, 1000)
+            elif composite > 0.55 and capital > 100:
+                buy_amount = min(capital * 0.7, 2000)
                 buy_shares = buy_amount / current_nav
                 if shares > 0:
                     avg_cost = (avg_cost * shares + current_nav * buy_shares) / (shares + buy_shares)
@@ -122,7 +122,7 @@ class Backtester:
                     'amount': buy_amount,
                     'composite': composite
                 })
-            elif composite < 0.40 and shares > 0:
+            elif composite < 0.45 and shares > 0:
                 sell_shares = shares * 0.5
                 sell_amount = sell_shares * current_nav
                 shares -= sell_shares
