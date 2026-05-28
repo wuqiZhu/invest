@@ -49,6 +49,10 @@ funds:
   enabled: true
   monthly_invest: 0
   name: 易方达沪深300ETF联接
+- code: '014881'
+  enabled: true
+  monthly_invest: 500
+  name: 天弘中证机器人ETF联接C
 notification:
   email:
     receiver_email: ''
