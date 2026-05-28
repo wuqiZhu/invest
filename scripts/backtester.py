@@ -32,6 +32,9 @@ class Backtester:
         navs = nav_data['单位净值'].values
         dates = nav_data.index.tolist()
 
+        if len(navs) < 21:
+            return None
+
         capital = initial_capital
         shares = 0
         trades = []
