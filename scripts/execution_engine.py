@@ -154,25 +154,34 @@ class ExecutionEngine:
         """
         获取当前基金净值
 
+        优先级：
+        1. 从东方财富API获取实时估值
+        2. 从数据库获取历史净值
+
         Args:
             fund_code: 基金代码
 
         Returns:
             float: 最新净值，失败返回 None
         """
+        if self.fetcher:
+            try:
+                info = self.fetcher.get_fund_info(fund_code)
+                if info:
+                    estimated_nav = info.get('估算净值', 0)
+                    if estimated_nav and estimated_nav > 0:
+                        return float(estimated_nav)
+                    unit_nav = info.get('单位净值', 0)
+                    if unit_nav and unit_nav > 0:
+                        return float(unit_nav)
+            except Exception:
+                pass
+
         if self.db:
             try:
                 df = self.db.get_fund_nav(fund_code)
                 if df is not None and not df.empty:
                     return float(df['单位净值'].iloc[-1])
-            except Exception:
-                pass
-
-        if self.fetcher:
-            try:
-                nav_data = self.fetcher.get_realtime_nav(fund_code)
-                if nav_data and '净值' in nav_data:
-                    return float(nav_data['净值'])
             except Exception:
                 pass
 
@@ -355,7 +364,7 @@ class ExecutionEngine:
 
     def get_portfolio_summary(self):
         """
-        获取当前持仓汇总
+        获取当前持仓汇总（使用实时净值计算）
 
         Returns:
             dict: 持仓信息
@@ -372,13 +381,26 @@ class ExecutionEngine:
             for fund_code in records['fund_code'].unique():
                 fund_records = records[records['fund_code'] == fund_code]
                 last = fund_records.iloc[-1]
+                total_shares = last.get('total_shares', 0)
+                total_invested = last.get('total_invested', 0)
+
+                current_nav = self._get_current_nav(fund_code)
+                if current_nav and current_nav > 0:
+                    current_value = total_shares * current_nav
+                else:
+                    current_value = last.get('current_value', 0)
+
+                profit = current_value - total_invested
+                profit_rate = (profit / total_invested * 100) if total_invested > 0 else 0
+
                 holdings.append({
                     'fund_code': fund_code,
-                    'total_shares': round(last.get('total_shares', 0), 2),
-                    'total_invested': round(last.get('total_invested', 0), 2),
-                    'current_value': round(last.get('current_value', 0), 2),
-                    'profit': round(last.get('profit', 0), 2),
-                    'profit_rate': round(last.get('profit_rate', 0), 2),
+                    'total_shares': round(total_shares, 2),
+                    'total_invested': round(total_invested, 2),
+                    'current_nav': round(current_nav, 4) if current_nav else None,
+                    'current_value': round(current_value, 2),
+                    'profit': round(profit, 2),
+                    'profit_rate': round(profit_rate, 2),
                 })
 
             total_invested = sum(h['total_invested'] for h in holdings)
