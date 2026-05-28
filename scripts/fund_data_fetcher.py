@@ -168,13 +168,17 @@ class FundDataFetcher:
         try:
             url = f"https://fundgz.1234567.com.cn/js/{fund_code}.js"
             response = self.session.get(url, timeout=10)
+            response.encoding = 'utf-8'
             
-            # 解析JavaScript响应
-            text = response.text
-            json_match = re.search(r'jsonpgz\((.*?)\)', text)
+            text = response.text.strip()
+            
+            json_match = re.search(r'jsonpgz\((.*)\)', text, re.DOTALL)
             
             if json_match:
-                json_str = json_match.group(1)
+                json_str = json_match.group(1).strip()
+                if json_str.endswith(';'):
+                    json_str = json_str[:-1]
+                
                 data = json.loads(json_str)
                 
                 return {

@@ -156,7 +156,8 @@ class ExecutionEngine:
 
         优先级：
         1. 从东方财富API获取实时估值
-        2. 从数据库获取历史净值
+        2. 从东方财富API获取历史净值
+        3. 从数据库获取历史净值
 
         Args:
             fund_code: 基金代码
@@ -174,6 +175,16 @@ class ExecutionEngine:
                     unit_nav = info.get('单位净值', 0)
                     if unit_nav and unit_nav > 0:
                         return float(unit_nav)
+            except Exception:
+                pass
+
+            try:
+                from datetime import datetime, timedelta
+                end_date = datetime.now().strftime('%Y-%m-%d')
+                start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+                df = self.fetcher.get_fund_nav(fund_code, start_date, end_date)
+                if df is not None and not df.empty:
+                    return float(df['单位净值'].iloc[-1])
             except Exception:
                 pass
 
