@@ -30,7 +30,7 @@ class FundDataFetcher:
         self.session = requests.Session()
         self.session.headers.update(self.headers)
     
-    def get_fund_nav(self, fund_code, start_date=None, end_date=None, max_retries=3):
+    def get_fund_nav(self, fund_code, start_date=None, end_date=None, max_retries=3, per_page=40):
         """
         获取基金净值数据
         
@@ -39,6 +39,7 @@ class FundDataFetcher:
             start_date: 开始日期，默认为1年前
             end_date: 结束日期，默认为今天
             max_retries: 最大重试次数
+            per_page: 每页数据量
         
         Returns:
             DataFrame: 基金净值数据
@@ -57,7 +58,7 @@ class FundDataFetcher:
                     'page': 1,
                     'sdate': start_date,
                     'edate': end_date,
-                    'per': 20
+                    'per': per_page
                 }
                 
                 timeout = 15 + attempt * 5
