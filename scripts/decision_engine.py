@@ -105,18 +105,24 @@ class DecisionEngine:
         except Exception:
             return {'safe': True, 'drawdown': 0}
 
-    def make_decision(self, analysis_report):
+    def make_decision(self, analysis_report, risk_alerts=None):
         """
         主决策流程
 
         Args:
             analysis_report: 分析报告数据（来自队列批次的 data 字段）
+            risk_alerts: 止盈止损信号列表
 
         Returns:
             dict: 决策结果
         """
         batch_id = analysis_report.get('batch_id', '')
         indicators = self._extract_indicators(analysis_report)
+
+        risk_map = {}
+        if risk_alerts:
+            for alert in risk_alerts:
+                risk_map[alert['fund_code']] = alert
 
         fund_codes = self.config.get_fund_codes()
         if not fund_codes:
@@ -140,9 +146,27 @@ class DecisionEngine:
                 fund_indicators, tech_signals, similar_cases
             )
 
+            if fund_code in risk_map:
+                alert = risk_map[fund_code]
+                if alert['action'] == 'stop_loss':
+                    decision_result['action'] = 'sell'
+                    decision_result['confidence'] = 0.9
+                    decision_result['reason'] = f'止损信号: 亏损{alert["profit_rate"]:.1f}%'
+                elif alert['action'] == 'take_profit':
+                    decision_result['action'] = 'sell'
+                    decision_result['confidence'] = 0.85
+                    decision_result['reason'] = f'止盈信号: 盈利{alert["profit_rate"]:.1f}%'
+
             if not risk_check['safe'] and decision_result['action'] == 'buy':
                 decision_result['action'] = 'hold'
                 decision_result['reason'] += f', 风控: {risk_check["message"]}'
+
+            amount = self._calculate_amount(
+                decision_result['action'], decision_result['confidence'],
+                fund_info.get('monthly_invest', 200)
+            )
+            if fund_code in risk_map and decision_result['action'] == 'sell':
+                amount = 0
 
             decision = {
                 'batch_id': batch_id,
@@ -151,10 +175,7 @@ class DecisionEngine:
                 'fund_name': fund_name,
                 'action': decision_result['action'],
                 'confidence': decision_result['confidence'],
-                'amount': self._calculate_amount(
-                    decision_result['action'], decision_result['confidence'],
-                    fund_info.get('monthly_invest', 200)
-                ),
+                'amount': amount,
                 'reason': decision_result['reason'],
                 'factors': decision_result['factors'],
                 'timestamp': datetime.now().isoformat()

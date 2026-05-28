@@ -85,6 +85,8 @@ class PipelineScheduler:
             'status': 'running'
         }
 
+        self.risk_alerts = []
+
         try:
             # 步骤0: 更新净值
             logger.info("步骤0: 更新基金净值")
@@ -105,6 +107,8 @@ class PipelineScheduler:
             logger.info("步骤3: 止盈止损检查")
             step3_result = self._run_step('止盈止损', self._step_check_risk)
             results['steps'].append(step3_result)
+            if step3_result.get('data', {}).get('alerts'):
+                self.risk_alerts = step3_result['data']['alerts']
 
             # 步骤4: 决策生成
             logger.info("步骤4: 决策生成")
@@ -256,7 +260,6 @@ class PipelineScheduler:
             return {'status': 'skipped', 'message': '依赖不可用'}
 
         try:
-            # 构建分析报告
             analysis_report = {
                 'sentiment_score': 0.72,
                 'keywords': ['央行降准', '半导体上涨', '消费回暖'],
@@ -264,8 +267,11 @@ class PipelineScheduler:
                 'timestamp': datetime.now().isoformat()
             }
 
-            # 使用正确的方法名 make_decision
-            decision = self.decision_engine.make_decision(analysis_report)
+            risk_alerts = getattr(self, 'risk_alerts', [])
+            if risk_alerts:
+                logger.info(f"传递 {len(risk_alerts)} 个止盈止损信号到决策引擎")
+
+            decision = self.decision_engine.make_decision(analysis_report, risk_alerts=risk_alerts)
             logger.info(f"决策结果: {decision}")
             return decision
         except Exception as e:
