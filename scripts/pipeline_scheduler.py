@@ -125,6 +125,11 @@ class PipelineScheduler:
             step6_result = self._run_step('通知', self._step_notify)
             results['steps'].append(step6_result)
 
+            # 步骤7: 回测验证
+            logger.info("步骤7: 回测验证")
+            step7_result = self._run_step('回测', self._step_backtest)
+            results['steps'].append(step7_result)
+
             results['status'] = 'success'
             self.pipeline_status['success_count'] += 1
 
@@ -364,6 +369,25 @@ class PipelineScheduler:
             lines.append("暂无持仓数据")
 
         return "\n".join(lines)
+
+    def _step_backtest(self) -> Dict[str, Any]:
+        """步骤7: 回测验证"""
+        logger.info("运行每日回测...")
+
+        try:
+            from daily_backtest import run_daily_backtest
+            report = run_daily_backtest()
+            logger.info(f"回测完成:\n{report}")
+            return {
+                'status': 'success',
+                'report': report
+            }
+        except Exception as e:
+            logger.error(f"回测失败: {e}")
+            return {
+                'status': 'error',
+                'error': str(e)
+            }
 
     def _save_result(self, results: Dict[str, Any]):
         """保存执行结果"""
