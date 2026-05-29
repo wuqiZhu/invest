@@ -27,6 +27,7 @@ try:
     from config_manager import ConfigManager
     from decision_engine import DecisionEngine
     from execution_engine import ExecutionEngine
+    from knowledge_manager import KnowledgeManager
     LOCAL_IMPORTS = True
 except ImportError:
     LOCAL_IMPORTS = False
@@ -57,6 +58,10 @@ class PipelineScheduler:
             self.config = ConfigManager(config_path)
             self.decision_engine = DecisionEngine(config_path)
             self.execution_engine = ExecutionEngine(config_path)
+            try:
+                self.knowledge_manager = KnowledgeManager()
+            except Exception:
+                self.knowledge_manager = None
 
         self.notification_url = os.environ.get(
             'NOTIFICATION_CENTER_URL',
@@ -278,6 +283,14 @@ class PipelineScheduler:
 
             decision = self.decision_engine.make_decision(analysis_report, risk_alerts=risk_alerts)
             logger.info(f"决策结果: {decision}")
+
+            if self.knowledge_manager and 'decisions' in decision:
+                for d in decision['decisions']:
+                    try:
+                        self.knowledge_manager.save_decision(d)
+                    except Exception as e:
+                        logger.warning(f"保存决策到知识库失败: {e}")
+
             return decision
         except Exception as e:
             logger.error(f"决策生成失败: {e}")
