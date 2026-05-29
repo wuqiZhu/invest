@@ -27,11 +27,17 @@ except ImportError:
 
 try:
     from fund_data_fetcher import FundDataFetcher
-    from fund_analyzer import FundAnalyzer
+    from fund_analyzer_v2 import FundAnalyzerV2 as FundAnalyzer
     from trading_system import TradingSystem
     TECH_AVAILABLE = True
 except ImportError:
-    TECH_AVAILABLE = False
+    try:
+        from fund_data_fetcher import FundDataFetcher
+        from fund_analyzer import FundAnalyzer
+        from trading_system import TradingSystem
+        TECH_AVAILABLE = True
+    except ImportError:
+        TECH_AVAILABLE = False
 
 
 WEIGHT_SENTIMENT = 0.35
