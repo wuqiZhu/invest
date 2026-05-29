@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-持仓日报模块
-生成详细的持仓日报，包括盈亏详情、技术信号、止盈止损预警
+持仓日报模块 v2.0
+生成详细的持仓日报，包括盈亏详情、技术信号、止盈止损预警、决策历史
 """
 
 import os
 import sys
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def generate_daily_report(config_path=None):
+def generate_daily_report(config_path=None, include_history=True):
     """生成持仓日报"""
     config = ConfigManager(config_path)
     executor = ExecutionEngine(config_path)
@@ -28,12 +28,13 @@ def generate_daily_report(config_path=None):
     lines = []
 
     lines.append(f"📊 持仓日报 {today}")
-    lines.append("=" * 30)
+    lines.append("=" * 40)
 
     portfolio = executor.get_portfolio_summary()
 
     lines.append("")
     lines.append("💰 投资组合总览")
+    lines.append("-" * 40)
     lines.append(f"总资产: ¥{portfolio.get('total_value', 0):,.2f}")
     lines.append(f"总投入: ¥{portfolio.get('total_invested', 0):,.2f}")
     profit = portfolio.get('total_value', 0) - portfolio.get('total_invested', 0)
@@ -42,9 +43,10 @@ def generate_daily_report(config_path=None):
 
     lines.append("")
     lines.append("📈 基金详情")
-    lines.append("-" * 30)
+    lines.append("-" * 40)
 
     holdings = portfolio.get('holdings', [])
+    total_daily_pnl = 0
     for holding in holdings:
         fund_code = holding.get('fund_code', '')
         fund_name = holding.get('fund_name', fund_code)
@@ -73,10 +75,28 @@ def generate_daily_report(config_path=None):
     if alerts:
         lines.append("")
         lines.append("🚨 止盈止损预警")
-        lines.append("-" * 30)
+        lines.append("-" * 40)
         for alert in alerts:
             action = "止盈" if alert['action'] == 'take_profit' else "止损"
             lines.append(f"⚠️ {alert['fund_code']}: {action}信号 (盈亏: {alert['profit_rate']:.2f}%)")
+
+    if include_history:
+        try:
+            from decision_history import DecisionHistory
+            history = DecisionHistory()
+            recent = history.get_decisions(
+                start_date=(datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+            )
+            if recent:
+                lines.append("")
+                lines.append("📋 近7天决策记录")
+                lines.append("-" * 40)
+                for d in recent[-5:]:
+                    action_emoji = {'buy': '🟢', 'sell': '🔴', 'hold': '⚪'}.get(d.get('action'), '⚪')
+                    lines.append(f"{action_emoji} {d.get('timestamp', '')[:10]} {d.get('fund_code', '')} {d.get('action', '').upper()} ¥{d.get('amount', 0):,.0f}")
+                    lines.append(f"   原因: {d.get('reason', '')[:50]}")
+        except Exception:
+            pass
 
     lines.append("")
     lines.append(f"报告生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

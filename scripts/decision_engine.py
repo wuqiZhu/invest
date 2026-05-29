@@ -26,6 +26,12 @@ except ImportError:
     KB_AVAILABLE = False
 
 try:
+    from decision_history import DecisionHistory, DecisionRecord, MarketContext, FactorScores, TechnicalIndicators
+    HISTORY_AVAILABLE = True
+except ImportError:
+    HISTORY_AVAILABLE = False
+
+try:
     from fund_data_fetcher import FundDataFetcher
     from fund_analyzer_v2 import FundAnalyzerV2 as FundAnalyzer
     from trading_system import TradingSystem
@@ -45,8 +51,8 @@ WEIGHT_TECHNICAL = 0.35
 WEIGHT_HISTORY = 0.10
 WEIGHT_KEYWORD = 0.25
 
-BUY_THRESHOLD = 0.52
-SELL_THRESHOLD = 0.48
+BUY_THRESHOLD = 0.58
+SELL_THRESHOLD = 0.42
 
 
 class DecisionEngine:
@@ -67,6 +73,13 @@ class DecisionEngine:
         if KB_AVAILABLE:
             try:
                 self.knowledge_db = KnowledgeVectorDB()
+            except Exception:
+                pass
+
+        self.decision_history = None
+        if HISTORY_AVAILABLE:
+            try:
+                self.decision_history = DecisionHistory()
             except Exception:
                 pass
 
@@ -190,6 +203,37 @@ class DecisionEngine:
                 'timestamp': datetime.now().isoformat()
             }
             decisions.append(decision)
+
+            if self.decision_history:
+                try:
+                    factors = decision_result.get('factors', {})
+                    record = DecisionRecord(
+                        decision_id=decision['decision_id'],
+                        timestamp=decision['timestamp'],
+                        fund_code=fund_code,
+                        fund_name=fund_name,
+                        action=decision_result['action'],
+                        confidence=decision_result['confidence'],
+                        amount=amount,
+                        reason=decision_result['reason'],
+                        market_context=MarketContext(date=datetime.now().strftime('%Y-%m-%d')),
+                        factor_scores=FactorScores(
+                            sentiment=factors.get('sentiment', {}).get('score', 0.5),
+                            technical=factors.get('technical', {}).get('score', 0.5),
+                            multi_timeframe=factors.get('multi_timeframe', {}).get('score', 0.5),
+                            momentum=factors.get('momentum', {}).get('score', 0.5),
+                            volatility=factors.get('volatility', {}).get('score', 0.5),
+                            history=factors.get('history', {}).get('score', 0.5),
+                            keyword=factors.get('keyword', {}).get('score', 0.5),
+                            composite=factors.get('composite', 0.5)
+                        ),
+                        technical_indicators=TechnicalIndicators(),
+                        buy_threshold=BUY_THRESHOLD,
+                        sell_threshold=SELL_THRESHOLD
+                    )
+                    self.decision_history.save_decision(record)
+                except Exception as e:
+                    logger.warning(f"保存决策历史失败: {e}")
 
         if len(decisions) == 1:
             return decisions[0]

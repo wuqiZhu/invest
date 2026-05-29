@@ -289,6 +289,57 @@ class FundNotifier:
         
         return alerts
 
+    def format_decision_notification(self, decision):
+        """格式化决策通知，包含详细的因子分析"""
+        action_emoji = {'buy': '🟢 买入', 'sell': '🔴 卖出', 'hold': '⚪ 观望'}
+        action_text = action_emoji.get(decision.get('action', 'hold'), '⚪ 观望')
+
+        lines = [
+            "📊 投资决策通知",
+            "=" * 30,
+            f"时间: {decision.get('timestamp', '')[:19]}",
+            f"基金: {decision.get('fund_code', '')} {decision.get('fund_name', '')}",
+            f"决策: {action_text}",
+            f"金额: ¥{decision.get('amount', 0):,.0f}",
+            f"置信度: {decision.get('confidence', 0):.0%}",
+            "",
+            "📈 决策因子分析",
+            "-" * 30,
+        ]
+
+        factors = decision.get('factors', {})
+        factor_names = {
+            'sentiment': '情绪因子',
+            'technical': '技术因子',
+            'multi_timeframe': '多时间框架',
+            'momentum': '动量因子',
+            'volatility': '波动率因子',
+            'history': '历史匹配',
+            'keyword': '关键词因子'
+        }
+
+        for key, name in factor_names.items():
+            factor = factors.get(key, {})
+            score = factor.get('score', 0.5)
+            bar = '█' * int(score * 10) + '░' * (10 - int(score * 10))
+            lines.append(f"{name}: [{bar}] {score:.2f}")
+
+        composite = factors.get('composite', 0.5)
+        lines.append(f"")
+        lines.append(f"综合得分: {composite:.2f}")
+        lines.append(f"买入阈值: 0.58 | 卖出阈值: 0.42")
+        lines.append(f"")
+        lines.append(f"💡 决策原因: {decision.get('reason', '无')}")
+        lines.append(f"")
+        lines.append("⚠️ 免责声明: 投资有风险，决策需谨慎")
+
+        return "\n".join(lines)
+
+    def send_decision_notification(self, decision, method='dingtalk', **kwargs):
+        """发送决策通知"""
+        content = self.format_decision_notification(decision)
+        return self.send(content, method=method, **kwargs)
+
 
 # 命令行接口
 def main():

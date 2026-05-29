@@ -19,7 +19,7 @@ class Backtester:
         db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fund_data.db')
         self.db = FundDatabase(db_path)
 
-    def run_backtest(self, fund_code, start_date=None, end_date=None, initial_capital=10000):
+    def run_backtest(self, fund_code, start_date=None, end_date=None, initial_capital=10000, buy_threshold=0.55, sell_threshold=0.45):
         if start_date is None:
             start_date = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
         if end_date is None:
@@ -105,7 +105,7 @@ class Backtester:
                     'amount': sell_amount,
                     'profit_rate': round(profit_rate * 100, 2)
                 })
-            elif composite > 0.55 and capital > 100:
+            elif composite > buy_threshold and capital > 100:
                 buy_amount = min(capital * 0.7, 2000)
                 buy_shares = buy_amount / current_nav
                 if shares > 0:
@@ -122,7 +122,7 @@ class Backtester:
                     'amount': buy_amount,
                     'composite': composite
                 })
-            elif composite < 0.45 and shares > 0:
+            elif composite < sell_threshold and shares > 0:
                 sell_shares = shares * 0.5
                 sell_amount = sell_shares * current_nav
                 shares -= sell_shares
