@@ -355,31 +355,59 @@ class PipelineScheduler:
     def _build_notification_text(self, portfolio: Dict[str, Any]) -> str:
         """构建通知内容"""
         lines = [
-            "## 📊 投资决策报告",
-            f"**时间**: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
-            "",
-            "### 持仓概况",
+            "� 投资决策通知",
+            f"时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            "=" * 30,
         ]
+
+        risk_alerts = getattr(self, 'risk_alerts', [])
+        if risk_alerts:
+            lines.append("")
+            lines.append("🚨 止盈止损预警")
+            lines.append("-" * 30)
+            for alert in risk_alerts:
+                action = "止盈" if alert['action'] == 'take_profit' else "止损"
+                lines.append(f"⚠️ {alert['fund_code']}: {action}信号 (盈亏: {alert['profit_rate']:.2f}%)")
+
+        lines.append("")
+        lines.append("💰 持仓概况")
+        lines.append("-" * 30)
 
         if portfolio.get('available'):
             holdings = portfolio.get('holdings', [])
             if holdings:
-                for h in holdings:
-                    profit_emoji = "📈" if h.get('profit', 0) >= 0 else "📉"
-                    lines.append(
-                        f"- {h.get('fund_code')}: "
-                        f"{h.get('total_shares')}份, "
-                        f"价值{h.get('current_value')}元, "
-                        f"{profit_emoji} {h.get('profit_rate', 0):.2f}%"
-                    )
+                total_invested = portfolio.get('total_invested', 0)
+                total_value = portfolio.get('total_value', 0)
+                total_profit = portfolio.get('total_profit', 0)
+                profit_rate = (total_profit / total_invested * 100) if total_invested > 0 else 0
+
+                lines.append(f"总资产: ¥{total_value:,.2f}")
+                lines.append(f"总收益: ¥{total_profit:,.2f} ({profit_rate:+.2f}%)")
                 lines.append("")
-                lines.append(f"**总投入**: {portfolio.get('total_invested', 0)}元")
-                lines.append(f"**总价值**: {portfolio.get('total_value', 0)}元")
-                lines.append(f"**总盈亏**: {portfolio.get('total_profit', 0)}元")
+
+                for h in holdings:
+                    fund_code = h.get('fund_code', '')
+                    profit_emoji = "📈" if h.get('profit', 0) >= 0 else "📉"
+                    pnl_rate = h.get('profit_rate', 0)
+
+                    lines.append(f"┌─────────────────────────────────────┐")
+                    lines.append(f"│ {fund_code}")
+                    lines.append(f"│ 份额: {h.get('total_shares', 0):.2f} | 市值: ¥{h.get('current_value', 0):,.2f}")
+                    lines.append(f"│ {profit_emoji} 盈亏: {pnl_rate:+.2f}%")
+
+                    if pnl_rate >= 15:
+                        lines.append(f"│ 🔴 接近止盈线(+20%)")
+                    elif pnl_rate <= -8:
+                        lines.append(f"│ ⚠️ 接近止损线(-10%)")
+
+                    lines.append(f"└─────────────────────────────────────┘")
             else:
                 lines.append("暂无持仓")
         else:
             lines.append("暂无持仓数据")
+
+        lines.append("")
+        lines.append(f"报告生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
         return "\n".join(lines)
 
