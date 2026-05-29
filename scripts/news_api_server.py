@@ -205,20 +205,26 @@ class NewsHandler(BaseHTTPRequestHandler):
     def _handle_portfolio(self, params):
         try:
             from execution_engine import ExecutionEngine
-            executor = ExecutionEngine(config)
+            executor = ExecutionEngine(str(config.config_path) if hasattr(config, 'config_path') else None)
             portfolio = executor.get_portfolio_summary()
             self._send_json(200, portfolio)
         except Exception as e:
+            import traceback
+            print(f"Error fetching portfolio: {e}")
+            print(traceback.format_exc())
             self._send_json(200, {'holdings': [], 'error': str(e)})
 
     def _handle_decisions(self, params):
         try:
             from knowledge_manager import KnowledgeManager
-            knowledge = KnowledgeManager(config)
+            knowledge = KnowledgeManager(str(config.config_path) if hasattr(config, 'config_path') else None)
             limit = int(params.get('limit', [20])[0])
             decisions = knowledge.get_recent_decisions(limit=limit)
             self._send_json(200, {'decisions': decisions})
         except Exception as e:
+            import traceback
+            print(f"Error fetching decisions: {e}")
+            print(traceback.format_exc())
             self._send_json(200, {'decisions': [], 'error': str(e)})
 
     def _handle_stats(self, params):
@@ -232,21 +238,28 @@ class NewsHandler(BaseHTTPRequestHandler):
             }
             try:
                 from execution_engine import ExecutionEngine
-                executor = ExecutionEngine(config)
+                executor = ExecutionEngine(str(config.config_path) if hasattr(config, 'config_path') else None)
                 portfolio = executor.get_portfolio_summary()
                 holdings = portfolio.get('holdings', [])
                 stats['total_funds'] = len(holdings)
+                total_cost = 0
                 for h in holdings:
                     market_value = h.get('shares', 0) * h.get('current_nav', 0)
                     cost_value = h.get('shares', 0) * h.get('avg_cost', 0)
                     stats['total_assets'] += market_value
+                    total_cost += cost_value
                     stats['total_profit'] += (market_value - cost_value)
-                if stats['total_assets'] > 0:
-                    stats['profit_rate'] = stats['total_profit'] / (stats['total_assets'] - stats['total_profit']) * 100
-            except Exception:
-                pass
+                if total_cost > 0:
+                    stats['profit_rate'] = stats['total_profit'] / total_cost * 100
+            except Exception as e:
+                import traceback
+                print(f"Error fetching stats: {e}")
+                print(traceback.format_exc())
             self._send_json(200, stats)
         except Exception as e:
+            import traceback
+            print(f"Error in stats handler: {e}")
+            print(traceback.format_exc())
             self._send_json(500, {'error': str(e)})
 
     def _handle_dashboard(self):
