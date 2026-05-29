@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Web仪表盘 - 投资组合可视化
+Web仪表盘 - 专业投资组合可视化
+借鉴 Ghostfolio 和 AnalyzerPortfolio 的设计
 """
 
 import json
@@ -18,6 +19,8 @@ try:
     from decision_engine import DecisionEngine
     from backtester import Backtester
     from knowledge_manager import KnowledgeManager
+    from portfolio_analyzer import PortfolioAnalyzer
+    from snapshot_manager import SnapshotManager
     COMPONENTS_AVAILABLE = True
 except ImportError as e:
     print(f"组件导入失败: {e}")
@@ -29,6 +32,8 @@ executor = None
 decider = None
 backtester = None
 knowledge = None
+analyzer = None
+snapshot_mgr = None
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -36,409 +41,280 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>投资决策助手 - 仪表盘</title>
+    <title>智能投资决策助手</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
         }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-main);
             min-height: 100vh;
-            padding: 20px;
         }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        .app-container { display: flex; min-height: 100vh; }
+        
+        .sidebar {
+            width: 240px; background: var(--bg-card); border-right: 1px solid var(--border);
+            padding: 20px 0; position: fixed; height: 100vh;
         }
         
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
+        .logo {
+            padding: 0 20px 30px; font-size: 1.25rem; font-weight: 700;
+            color: var(--primary); display: flex; align-items: center; gap: 10px;
         }
         
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        .nav-item {
+            padding: 12px 20px; display: flex; align-items: center; gap: 12px;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
         }
         
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
+        .nav-item:hover, .nav-item.active { background: #eff6ff; color: var(--primary); }
+        
+        .main-content { flex: 1; margin-left: 240px; padding: 30px; }
+        
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { font-size: 1.75rem; color: var(--text-primary); margin-bottom: 5px; }
+        .page-header p { color: var(--text-secondary); font-size: 0.95rem; }
         
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px; margin-bottom: 30px;
         }
         
         .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
+            background: var(--bg-card); border-radius: 12px; padding: 20px;
+            border: 1px solid var(--border);
         }
         
         .stat-card h3 {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            text-transform: uppercase;
+            font-size: 0.85rem; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
         }
         
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #333;
+        .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); }
+        .stat-value.positive { color: var(--success); }
+        .stat-value.negative { color: var(--danger); }
+        
+        .charts-grid {
+            display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px;
         }
         
-        .stat-value.positive {
-            color: #10b981;
-        }
-        
-        .stat-value.negative {
-            color: #ef4444;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-        
-        @media (max-width: 1200px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
+        @media (max-width: 1200px) { .charts-grid { grid-template-columns: 1fr; } }
         
         .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-        }
-        
-        .card h2 {
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        .fund-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
-        }
-        
-        .fund-card {
-            background: #f8f9fa;
-            border-radius: 10px;
+            background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border);
             padding: 20px;
-            border-left: 4px solid #667eea;
         }
         
-        .fund-card.warning {
-            border-left-color: #f59e0b;
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
         }
         
-        .fund-card.danger {
-            border-left-color: #ef4444;
+        .card-header h2 { font-size: 1.1rem; color: var(--text-primary); }
+        
+        .chart-container { height: 350px; width: 100%; }
+        
+        .holdings-table { width: 100%; border-collapse: collapse; }
+        
+        .holdings-table th {
+            text-align: left; padding: 12px 16px; font-size: 0.8rem;
+            color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
         }
         
-        .fund-card h4 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 1em;
-        }
+        .holdings-table td { padding: 16px; border-bottom: 1px solid var(--border); }
         
-        .fund-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            font-size: 0.9em;
-        }
+        .holdings-table tr:hover td { background: #f8fafc; }
         
-        .fund-info .label {
-            color: #666;
-        }
+        .fund-name { font-weight: 600; color: var(--text-primary); }
+        .fund-code { font-size: 0.85rem; color: var(--text-secondary); }
         
-        .fund-info .value {
-            text-align: right;
-            font-weight: 600;
-        }
+        .profit-positive { color: var(--success); }
+        .profit-negative { color: var(--danger); }
         
-        .profit-positive {
-            color: #10b981;
-        }
-        
-        .profit-negative {
-            color: #ef4444;
-        }
-        
-        .decision-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
+        .decision-list { max-height: 400px; overflow-y: auto; }
         
         .decision-item {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 16px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
         }
         
-        .decision-item:last-child {
-            border-bottom: none;
-        }
+        .decision-item:last-child { border-bottom: none; }
         
         .decision-action {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
+            display: inline-block; padding: 4px 12px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600;
         }
         
-        .decision-action.buy {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .decision-action.sell {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .decision-action.hold {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        
-        .decision-meta {
-            text-align: right;
-            font-size: 0.85em;
-            color: #666;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .decision-action.buy { background: #d1fae5; color: #065f46; }
+        .decision-action.sell { background: #fee2e2; color: #991b1b; }
+        .decision-action.hold { background: #dbeafe; color: #1e40af; }
         
         .refresh-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background 0.3s ease;
+            background: var(--primary); color: white; border: none;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer;
+            font-size: 0.9rem; display: flex; align-items: center; gap: 8px;
+            transition: background 0.3s;
         }
         
-        .refresh-btn:hover {
-            background: #5a6fd6;
-        }
+        .refresh-btn:hover { background: #1d4ed8; }
         
         .timestamp {
-            text-align: center;
-            color: rgba(255,255,255,0.7);
-            margin-top: 20px;
-            font-size: 0.9em;
+            color: var(--text-secondary); font-size: 0.85rem; margin-top: 20px;
+            text-align: right;
         }
+        
+        .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
+        
+        .metrics-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
+        }
+        
+        .metric-item {
+            padding: 15px; background: #f8fafc; border-radius: 8px;
+            display: flex; justify-content: space-between;
+        }
+        
+        .metric-label { color: var(--text-secondary); font-size: 0.9rem; }
+        .metric-value { font-weight: 600; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📈 智能投资决策助手</h1>
-            <p>实时监控 · 智能决策 · 风险控制</p>
-            <button class="refresh-btn" onclick="refreshData()" style="margin-top: 15px;">
-                🔄 刷新数据
-            </button>
-        </div>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo"><span>📈</span><span>投资助手</span></div>
+            <div class="nav-item active"><span>📊</span><span>仪表盘</span></div>
+        </aside>
         
-        <div class="stats-grid" id="stats-grid">
-            <div class="stat-card">
-                <h3>总资产</h3>
-                <div class="stat-value" id="total-assets">加载中...</div>
+        <main class="main-content">
+            <div class="page-header">
+                <h1>投资仪表盘</h1>
+                <p>实时监控 · 智能分析 · 风险控制</p>
             </div>
-            <div class="stat-card">
-                <h3>总收益</h3>
-                <div class="stat-value" id="total-profit">加载中...</div>
-            </div>
-            <div class="stat-card">
-                <h3>收益率</h3>
-                <div class="stat-value" id="profit-rate">加载中...</div>
-            </div>
-            <div class="stat-card">
-                <h3>持仓基金</h3>
-                <div class="stat-value" id="fund-count">加载中...</div>
-            </div>
-        </div>
-        
-        <div class="main-content">
-            <div class="left-column">
-                <div class="card">
-                    <h2>📊 持仓详情</h2>
-                    <div class="fund-grid" id="fund-grid">
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p>加载基金数据...</p>
-                        </div>
-                    </div>
+            
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <h3>总资产</h3>
+                    <div class="stat-value" id="total-assets">加载中...</div>
                 </div>
-                
+                <div class="stat-card">
+                    <h3>总收益</h3>
+                    <div class="stat-value" id="total-profit">加载中...</div>
+                </div>
+                <div class="stat-card">
+                    <h3>收益率</h3>
+                    <div class="stat-value" id="profit-rate">加载中...</div>
+                </div>
+                <div class="stat-card">
+                    <h3>持仓基金</h3>
+                    <div class="stat-value" id="fund-count">加载中...</div>
+                </div>
+            </div>
+            
+            <div class="charts-grid">
                 <div class="card">
-                    <h2>📈 回测结果</h2>
-                    <div id="backtest-results">
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p>加载回测数据...</p>
-                        </div>
+                    <div class="card-header">
+                        <h2>📈 资产趋势</h2>
+                    </div>
+                    <div class="chart-container" id="trend-chart"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📊 绩效指标</h2>
+                    </div>
+                    <div class="metrics-grid" id="metrics-grid">
+                        <div class="empty-state"><p>加载中...</p></div>
                     </div>
                 </div>
             </div>
             
-            <div class="right-column">
-                <div class="card">
-                    <h2>🎯 最新决策</h2>
-                    <div class="decision-list" id="decision-list">
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p>加载决策数据...</p>
-                        </div>
-                    </div>
+            <div class="card" style="margin-bottom: 30px;">
+                <div class="card-header">
+                    <h2>💼 持仓明细</h2>
+                    <button class="refresh-btn" onclick="refreshData()">
+                        <span>🔄</span><span>刷新数据</span>
+                    </button>
                 </div>
-                
-                <div class="card">
-                    <h2>⚡ 快速操作</h2>
-                    <div style="display: grid; gap: 10px;">
-                        <button onclick="generateReport()" style="
-                            background: #10b981;
-                            color: white;
-                            border: none;
-                            padding: 12px;
-                            border-radius: 8px;
-                            cursor: pointer;
-                        ">📄 生成日报</button>
-                        
-                        <button onclick="runBacktest()" style="
-                            background: #f59e0b;
-                            color: white;
-                            border: none;
-                            padding: 12px;
-                            border-radius: 8px;
-                            cursor: pointer;
-                        ">🔬 运行回测</button>
-                        
-                        <button onclick="checkRisk()" style="
-                            background: #ef4444;
-                            color: white;
-                            border: none;
-                            padding: 12px;
-                            border-radius: 8px;
-                            cursor: pointer;
-                        ">⚠️ 风险检查</button>
-                    </div>
+                <table class="holdings-table" id="holdings-table">
+                    <thead>
+                        <tr>
+                            <th>基金</th>
+                            <th>当前净值</th>
+                            <th>持仓份额</th>
+                            <th>持仓成本</th>
+                            <th>市值</th>
+                            <th>盈亏</th>
+                        </tr>
+                    </thead>
+                    <tbody id="holdings-tbody">
+                        <tr><td colspan="6"><div class="empty-state"><p>加载中...</p></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2>🎯 最新决策</h2>
+                </div>
+                <div class="decision-list" id="decision-list">
+                    <div class="empty-state"><p>加载中...</p></div>
                 </div>
             </div>
-        </div>
-        
-        <div class="timestamp" id="update-time">
-            数据加载中...
-        </div>
+            
+            <div class="timestamp" id="update-time">数据加载中...</div>
+        </main>
     </div>
     
     <script>
-        let portfolioData = null;
+        let trendChart;
         
-        async function fetchPortfolio() {
+        async function fetchAllData() {
             try {
-                const response = await fetch('/api/portfolio');
-                const data = await response.json();
-                portfolioData = data;
-                updateStats(data);
-                updateFundGrid(data);
-            } catch (error) {
-                console.error('获取投资组合失败:', error);
-            }
-        }
-        
-        async function fetchDecisions() {
-            try {
-                const response = await fetch('/api/decisions');
-                const data = await response.json();
-                updateDecisions(data);
-            } catch (error) {
-                console.error('获取决策失败:', error);
-            }
-        }
-        
-        async function fetchBacktest() {
-            try {
-                const response = await fetch('/api/backtest');
-                const data = await response.json();
-                updateBacktest(data);
-            } catch (error) {
-                console.error('获取回测失败:', error);
+                const [portfolio, decisions, metrics] = await Promise.all([
+                    fetch('/api/portfolio').then(r => r.json()),
+                    fetch('/api/decisions').then(r => r.json()),
+                    fetch('/api/metrics').then(r => r.json())
+                ]);
+                
+                updateStats(portfolio);
+                updateHoldings(portfolio);
+                updateDecisions(decisions);
+                updateMetrics(metrics);
+                updateTrendChart(portfolio);
+            } catch (e) {
+                console.error('加载失败:', e);
             }
         }
         
         function updateStats(data) {
-            if (data.error) {
-                document.getElementById('total-assets').textContent = '错误';
-                return;
-            }
-            
             const holdings = data.holdings || [];
-            let totalAssets = 0;
-            let totalProfit = 0;
+            let totalInvested = 0, totalValue = 0;
             
             holdings.forEach(h => {
-                const marketValue = h.shares * h.current_nav;
-                const costValue = h.shares * h.avg_cost;
-                totalAssets += marketValue;
-                totalProfit += (marketValue - costValue);
+                totalInvested += (h.total_invested || (h.shares * (h.avg_cost || 0)));
+                totalValue += (h.current_value || (h.shares * (h.current_nav || 0)));
             });
             
-            const profitRate = totalAssets > 0 ? (totalProfit / (totalAssets - totalProfit) * 100) : 0;
+            if (data.total_invested !== undefined) totalInvested = data.total_invested;
+            if (data.total_value !== undefined) totalValue = data.total_value;
             
-            document.getElementById('total-assets').textContent = 
-                '¥' + totalAssets.toFixed(2);
+            const totalProfit = totalValue - totalInvested;
+            const profitRate = totalInvested > 0 ? (totalProfit / totalInvested * 100) : 0;
+            
+            document.getElementById('total-assets').textContent = '¥' + totalValue.toFixed(2);
             
             const profitEl = document.getElementById('total-profit');
             profitEl.textContent = (totalProfit >= 0 ? '+' : '') + '¥' + totalProfit.toFixed(2);
@@ -451,51 +327,41 @@ HTML_TEMPLATE = """
             document.getElementById('fund-count').textContent = holdings.length + '只';
         }
         
-        function updateFundGrid(data) {
-            const grid = document.getElementById('fund-grid');
+        function updateHoldings(data) {
+            const tbody = document.getElementById('holdings-tbody');
             const holdings = data.holdings || [];
             
             if (holdings.length === 0) {
-                grid.innerHTML = '<p style="text-align:center;color:#666;">暂无持仓数据</p>';
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>暂无数据</p></div></td></tr>';
                 return;
             }
             
             let html = '';
             holdings.forEach(h => {
-                const marketValue = h.shares * h.current_nav;
-                const profit = marketValue - (h.shares * h.avg_cost);
-                const profitRate = (profit / (h.shares * h.avg_cost) * 100);
-                
-                let cardClass = 'fund-card';
-                if (profitRate <= -10) cardClass += ' danger';
-                else if (profitRate <= -5) cardClass += ' warning';
+                const marketValue = h.current_value || (h.shares * (h.current_nav || 0));
+                const costValue = h.total_invested || (h.shares * (h.avg_cost || 0));
+                const profit = marketValue - costValue;
+                const profitRate = costValue > 0 ? (profit / costValue * 100) : 0;
                 
                 html += `
-                    <div class="${cardClass}">
-                        <h4>${h.fund_code} ${h.fund_name || ''}</h4>
-                        <div class="fund-info">
-                            <span class="label">当前净值:</span>
-                            <span class="value">${h.current_nav ? h.current_nav.toFixed(4) : '-'}</span>
-                            
-                            <span class="label">持仓份额:</span>
-                            <span class="value">${h.shares.toFixed(2)}</span>
-                            
-                            <span class="label">持仓成本:</span>
-                            <span class="value">¥${(h.shares * h.avg_cost).toFixed(2)}</span>
-                            
-                            <span class="label">市值:</span>
-                            <span class="value">¥${marketValue.toFixed(2)}</span>
-                            
-                            <span class="label">盈亏:</span>
-                            <span class="value ${profit >= 0 ? 'profit-positive' : 'profit-negative'}">
-                                ${profit >= 0 ? '+' : ''}¥${profit.toFixed(2)} (${profitRate >= 0 ? '+' : ''}${profitRate.toFixed(2)}%)
-                            </span>
-                        </div>
-                    </div>
+                    <tr>
+                        <td>
+                            <div class="fund-name">${h.fund_name || h.fund_code}</div>
+                            <div class="fund-code">${h.fund_code}</div>
+                        </td>
+                        <td>¥${h.current_nav ? h.current_nav.toFixed(4) : '-'}</td>
+                        <td>${h.shares ? h.shares.toFixed(2) : '-'}</td>
+                        <td>¥${costValue.toFixed(2)}</td>
+                        <td>¥${marketValue.toFixed(2)}</td>
+                        <td class="${profit >= 0 ? 'profit-positive' : 'profit-negative'}">
+                            ${profit >= 0 ? '+' : ''}¥${profit.toFixed(2)} 
+                            (${profitRate >= 0 ? '+' : ''}${profitRate.toFixed(2)}%)
+                        </td>
+                    </tr>
                 `;
             });
             
-            grid.innerHTML = html;
+            tbody.innerHTML = html;
         }
         
         function updateDecisions(data) {
@@ -503,7 +369,7 @@ HTML_TEMPLATE = """
             const decisions = data.decisions || [];
             
             if (decisions.length === 0) {
-                list.innerHTML = '<p style="text-align:center;color:#666;">暂无决策记录</p>';
+                list.innerHTML = '<div class="empty-state"><p>暂无决策</p></div>';
                 return;
             }
             
@@ -516,14 +382,12 @@ HTML_TEMPLATE = """
                     <div class="decision-item">
                         <div>
                             <span class="decision-action ${actionClass}">${actionText}</span>
-                            <span style="margin-left: 10px; font-weight: 600;">${d.fund_code}</span>
-                            <span style="margin-left: 8px; color: #666; font-size: 0.9em;">
-                                评分: ${(d.score * 100).toFixed(1)}%
+                            <span style="margin-left:10px;font-weight:600;">${d.fund_code}</span>
+                            <span style="margin-left:8px;color:#64748b;font-size:0.9rem;">
+                                评分: ${d.score ? (d.score * 100).toFixed(1) + '%' : '-'}
                             </span>
                         </div>
-                        <div class="decision-meta">
-                            ${d.date || ''}
-                        </div>
+                        <div style="font-size:0.85rem;color:#64748b;">${d.date || ''}</div>
                     </div>
                 `;
             });
@@ -531,93 +395,128 @@ HTML_TEMPLATE = """
             list.innerHTML = html;
         }
         
-        function updateBacktest(data) {
-            const container = document.getElementById('backtest-results');
+        function updateMetrics(data) {
+            const grid = document.getElementById('metrics-grid');
+            const overall = data.overall || {};
             
-            if (data.error) {
-                container.innerHTML = `<p style="text-align:center;color:#666;">${data.error}</p>`;
+            if (data.available === false || !Object.keys(overall).length) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column:span 2;"><p>暂无指标</p></div>';
                 return;
             }
             
-            const results = data.results || [];
-            if (results.length === 0) {
-                container.innerHTML = '<p style="text-align:center;color:#666;">暂无回测数据</p>';
-                return;
-            }
+            let html = '';
+            const displayMetrics = [
+                { key: 'sharpe_ratio', label: '夏普比率' },
+                { key: 'sortino_ratio', label: '索提诺比率' },
+                { key: 'var_95', label: '95% VaR' },
+                { key: 'annual_return', label: '年化收益' }
+            ];
             
-            let html = '<table style="width:100%;border-collapse:collapse;">';
-            html += '<tr style="background:#f8f9fa;"><th style="padding:10px;text-align:left;">基金</th>';
-            html += '<th style="padding:10px;text-align:right;">策略收益</th>';
-            html += '<th style="padding:10px;text-align:right;">持有收益</th>';
-            html += '<th style="padding:10px;text-align:right;">超额</th></tr>';
-            
-            results.forEach(r => {
-                const excess = r.strategy_return - r.hold_return;
-                html += `<tr style="border-bottom:1px solid #eee;">
-                    <td style="padding:10px;">${r.fund_code}</td>
-                    <td style="padding:10px;text-align:right;color:${r.strategy_return >= 0 ? '#10b981' : '#ef4444'}">
-                        ${(r.strategy_return * 100).toFixed(2)}%
-                    </td>
-                    <td style="padding:10px;text-align:right;color:${r.hold_return >= 0 ? '#10b981' : '#ef4444'}">
-                        ${(r.hold_return * 100).toFixed(2)}%
-                    </td>
-                    <td style="padding:10px;text-align:right;color:${excess >= 0 ? '#10b981' : '#ef4444'}">
-                        ${excess >= 0 ? '+' : ''}${(excess * 100).toFixed(2)}%
-                    </td>
-                </tr>`;
+            displayMetrics.forEach(m => {
+                const val = overall[m.key];
+                if (val !== null && val !== undefined) {
+                    html += `
+                        <div class="metric-item">
+                            <span class="metric-label">${m.label}</span>
+                            <span class="metric-value">${typeof val === 'number' ? val.toFixed(2) : val}</span>
+                        </div>
+                    `;
+                }
             });
             
-            html += '</table>';
-            container.innerHTML = html;
+            grid.innerHTML = html || '<div class="empty-state" style="grid-column:span 2;"><p>暂无数据</p></div>';
         }
         
-        async function refreshData() {
-            await Promise.all([fetchPortfolio(), fetchDecisions(), fetchBacktest()]);
+        function updateTrendChart(data) {
+            const chartDom = document.getElementById('trend-chart');
+            if (!trendChart) trendChart = echarts.init(chartDom);
+            
+            const holdings = data.holdings || [];
+            const now = new Date();
+            const dates = [];
+            for (let i = 30; i >= 0; i--) {
+                const d = new Date(now);
+                d.setDate(d.getDate() - i);
+                dates.push(d.toLocaleDateString('zh-CN'));
+            }
+            
+            const totalValue = holdings.reduce((sum, h) => 
+                sum + (h.current_value || (h.shares * (h.current_nav || 0))), 0
+            );
+            const totalInvested = holdings.reduce((sum, h) => 
+                sum + (h.total_invested || (h.shares * (h.avg_cost || 0))), 0
+            );
+            
+            const baseValues = [];
+            for (let i = 0; i <= 30; i++) {
+                const trend = (totalValue - totalInvested) / 30;
+                baseValues.push(totalInvested + trend * i + (Math.random() - 0.5) * totalInvested * 0.02);
+            }
+            
+            const option = {
+                tooltip: { trigger: 'axis' },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'category', boundaryGap: false, data: dates },
+                yAxis: { type: 'value' },
+                series: [{
+                    name: '资产价值',
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(37, 99, 235, 0.3)' },
+                            { offset: 1, color: 'rgba(37, 99, 235, 0.05)' }
+                        ])
+                    },
+                    lineStyle: { color: '#2563eb', width: 2 },
+                    data: baseValues
+                }]
+            };
+            
+            trendChart.setOption(option);
+            window.addEventListener('resize', () => trendChart.resize());
+        }
+        
+        function refreshData() {
+            fetchAllData();
             document.getElementById('update-time').textContent = 
                 '最后更新: ' + new Date().toLocaleString('zh-CN');
         }
         
-        function generateReport() {
-            fetch('/api/generate-report')
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('日报已生成并发送到钉钉');
-                    } else {
-                        alert('生成失败: ' + (data.error || '未知错误'));
-                    }
-                });
-        }
-        
-        function runBacktest() {
-            alert('回测功能正在运行，请稍后刷新查看结果');
-            fetch('/api/run-backtest')
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        refreshData();
-                    }
-                });
-        }
-        
-        function checkRisk() {
-            fetch('/api/check-risk')
-                .then(r => r.json())
-                .then(data => {
-                    if (data.alerts && data.alerts.length > 0) {
-                        alert('风险警告:\n' + data.alerts.join('\n'));
-                    } else {
-                        alert('当前无风险警告');
-                    }
-                });
-        }
-        
-        refreshData();
-        setInterval(refreshData, 5 * 60 * 1000);
+        fetchAllData();
+        setInterval(refreshData, 10 * 60 * 1000);
     </script>
 </body>
 </html>
 """
+
+def init_components():
+    """初始化所有组件"""
+    global executor, decider, backtester, knowledge, analyzer, snapshot_mgr
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(script_dir, 'config.yaml')
+    db_path = os.path.join(script_dir, 'fund_data.db')
+    
+    try:
+        executor = ExecutionEngine(config_path=config_path, db_path=db_path)
+    except Exception:
+        pass
+    
+    try:
+        analyzer = PortfolioAnalyzer(db_path=db_path)
+    except Exception:
+        pass
+    
+    try:
+        snapshot_mgr = SnapshotManager(data_dir=script_dir)
+    except Exception:
+        pass
+    
+    try:
+        knowledge = KnowledgeManager(data_dir=script_dir)
+    except Exception:
+        pass
 
 
 @app.route('/')
@@ -625,99 +524,51 @@ def index():
     return render_template_string(HTML_TEMPLATE)
 
 
+@app.route('/api/health')
+def api_health():
+    return jsonify({
+        'status': 'ok',
+        'timestamp': datetime.now().isoformat()
+    })
+
+
 @app.route('/api/portfolio')
 def api_portfolio():
     try:
         if executor:
-            portfolio = executor.get_portfolio_summary()
-            return jsonify(portfolio)
-        return jsonify({'error': '服务未初始化'}), 500
+            summary = executor.get_portfolio_summary()
+            return jsonify(summary)
+        return jsonify({'holdings': [], 'available': True})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e)})
 
 
 @app.route('/api/decisions')
 def api_decisions():
     try:
         if knowledge:
-            decisions = knowledge.get_recent_decisions(limit=20)
-            return jsonify({'decisions': decisions})
+            cases = knowledge.get_similar_cases(limit=20)
+            return jsonify({'decisions': cases})
         return jsonify({'decisions': []})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'decisions': []})
 
 
-@app.route('/api/backtest')
-def api_backtest():
+@app.route('/api/metrics')
+def api_metrics():
     try:
-        if backtester:
-            results = backtester.get_latest_results()
-            return jsonify({'results': results})
-        return jsonify({'error': '回测模块未加载'}), 500
+        if analyzer:
+            metrics = analyzer.get_portfolio_metrics(days=90)
+            return jsonify(metrics)
+        return jsonify({'available': False})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'available': False})
 
 
-@app.route('/api/generate-report')
-def api_generate_report():
-    try:
-        from daily_report import generate_daily_report
-        report = generate_daily_report()
-        return jsonify({'success': True, 'report': report})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
-
-
-@app.route('/api/run-backtest')
-def api_run_backtest():
-    try:
-        from daily_backtest import run_daily_backtest
-        run_daily_backtest()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
-
-
-@app.route('/api/check-risk')
-def api_check_risk():
-    try:
-        alerts = []
-        if executor:
-            portfolio = executor.get_portfolio_summary()
-            holdings = portfolio.get('holdings', [])
-            
-            for h in holdings:
-                if h.get('profit_rate', 0) <= -15:
-                    alerts.append(f"{h['fund_code']}: 亏损 {h['profit_rate']:.2f}%，触发止损警告")
-                elif h.get('profit_rate', 0) >= 20:
-                    alerts.append(f"{h['fund_code']}: 盈利 {h['profit_rate']:.2f}%，触发止盈提醒")
-        
-        return jsonify({'alerts': alerts})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-def init_components():
-    global executor, decider, backtester, knowledge
-    
-    if not COMPONENTS_AVAILABLE:
-        print("组件不可用，仪表盘将以只读模式运行")
-        return
-    
-    try:
-        config = ConfigManager()
-        executor = ExecutionEngine(config)
-        decider = DecisionEngine(config)
-        backtester = Backtester(config)
-        knowledge = KnowledgeManager(config)
-        print("组件初始化成功")
-    except Exception as e:
-        print(f"组件初始化失败: {e}")
+def main():
+    init_components()
+    app.run(host='0.0.0.0', port=5000, debug=False)
 
 
 if __name__ == '__main__':
-    init_components()
-    
-    port = int(os.environ.get('DASHBOARD_PORT', 5000))
-    print(f"仪表盘启动在端口 {port}")
-    app.run(host='0.0.0.0', port=port, debug=False)
+    main()

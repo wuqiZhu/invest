@@ -1,0 +1,293 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-05-29T20:22:05.766463",
+  "batches": [
+    {
+      "batch_id": "test_20260529_202156",
+      "status": "learned",
+      "created_at": "2026-05-29T20:21:56.813173",
+      "updated_at": "2026-05-29T20:22:05.766463",
+      "priority": "high",
+      "data": {
+        "news_count": 150,
+        "sentiment_score": 0.72,
+        "key_themes": [
+          "央行降准",
+          "半导体上涨",
+          "消费回暖"
+        ],
+        "ai_summary": "央行宣布降准0.5个百分点，释放长期资金约1万亿元",
+        "alerts": [],
+        "analysis_time": "2026-05-29T20:21:56.813173"
+      },
+      "decision": {
+        "batch_id": "test_20260529_202156",
+        "decisions": [
+          {
+            "batch_id": "test_20260529_202156",
+            "decision_id": "dec_20260529_202159_110011",
+            "fund_code": "110011",
+            "fund_name": "易方达中小盘混合",
+            "action": "hold",
+            "confidence": 0.5,
+            "amount": 0,
+            "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+            "factors": {
+              "sentiment_score": 0.72,
+              "technical_score": 0.5,
+              "technical_signal": "HOLD",
+              "multi_timeframe_score": 0.5,
+              "multi_timeframe_signal": "N/A",
+              "history_score": 0.5,
+              "historical_match": false,
+              "keyword_score": 1.0,
+              "composite_score": 0.549
+            },
+            "timestamp": "2026-05-29T20:21:59.627394"
+          },
+          {
+            "batch_id": "test_20260529_202156",
+            "decision_id": "dec_20260529_202200_161725",
+            "fund_code": "161725",
+            "fund_name": "招商中证白酒指数",
+            "action": "buy",
+            "confidence": 0.609,
+            "amount": 300,
+            "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+            "factors": {
+              "sentiment_score": 0.72,
+              "technical_score": 0.5,
+              "technical_signal": "HOLD",
+              "multi_timeframe_score": 0.5,
+              "multi_timeframe_signal": "N/A",
+              "history_score": 0.5,
+              "historical_match": false,
+              "keyword_score": 1.0,
+              "composite_score": 0.609
+            },
+            "timestamp": "2026-05-29T20:22:00.655553"
+          },
+          {
+            "batch_id": "test_20260529_202156",
+            "decision_id": "dec_20260529_202201_110020",
+            "fund_code": "110020",
+            "fund_name": "易方达沪深300ETF联接",
+            "action": "buy",
+            "confidence": 0.589,
+            "amount": 100,
+            "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+            "factors": {
+              "sentiment_score": 0.72,
+              "technical_score": 0.5,
+              "technical_signal": "HOLD",
+              "multi_timeframe_score": 0.5,
+              "multi_timeframe_signal": "N/A",
+              "history_score": 0.5,
+              "historical_match": false,
+              "keyword_score": 1.0,
+              "composite_score": 0.589
+            },
+            "timestamp": "2026-05-29T20:22:01.565460"
+          },
+          {
+            "batch_id": "test_20260529_202156",
+            "decision_id": "dec_20260529_202202_014881",
+            "fund_code": "014881",
+            "fund_name": "天弘中证机器人ETF联接C",
+            "action": "hold",
+            "confidence": 0.5,
+            "amount": 0,
+            "reason": "情绪指数=0.72, 技术信号=SELL, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+            "factors": {
+              "sentiment_score": 0.72,
+              "technical_score": 0.2,
+              "technical_signal": "SELL",
+              "multi_timeframe_score": 0.5,
+              "multi_timeframe_signal": "N/A",
+              "history_score": 0.5,
+              "historical_match": false,
+              "keyword_score": 1.0,
+              "composite_score": 0.504
+            },
+            "timestamp": "2026-05-29T20:22:02.380725"
+          },
+          {
+            "batch_id": "test_20260529_202156",
+            "decision_id": "dec_20260529_202203_001156",
+            "fund_code": "001156",
+            "fund_name": "申万菱信新能源汽车",
+            "action": "hold",
+            "confidence": 0.5,
+            "amount": 0,
+            "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+            "factors": {
+              "sentiment_score": 0.72,
+              "technical_score": 0.5,
+              "technical_signal": "HOLD",
+              "multi_timeframe_score": 0.5,
+              "multi_timeframe_signal": "N/A",
+              "history_score": 0.5,
+              "historical_match": false,
+              "keyword_score": 1.0,
+              "composite_score": 0.539
+            },
+            "timestamp": "2026-05-29T20:22:03.576837"
+          },
+          {
+            "batch_id": "test_20260529_202156",
+            "decision_id": "dec_20260529_202204_003095",
+            "fund_code": "003095",
+            "fund_name": "中欧医疗健康混合",
+            "action": "hold",
+            "confidence": 0.5,
+            "amount": 0,
+            "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+            "factors": {
+              "sentiment_score": 0.72,
+              "technical_score": 0.5,
+              "technical_signal": "HOLD",
+              "multi_timeframe_score": 0.5,
+              "multi_timeframe_signal": "N/A",
+              "history_score": 0.5,
+              "historical_match": false,
+              "keyword_score": 1.0,
+              "composite_score": 0.549
+            },
+            "timestamp": "2026-05-29T20:22:04.464820"
+          },
+          {
+            "batch_id": "test_20260529_202156",
+            "decision_id": "dec_20260529_202205_005827",
+            "fund_code": "005827",
+            "fund_name": "易方达蓝筹精选混合",
+            "action": "hold",
+            "confidence": 0.5,
+            "amount": 0,
+            "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+            "factors": {
+              "sentiment_score": 0.72,
+              "technical_score": 0.5,
+              "technical_signal": "HOLD",
+              "multi_timeframe_score": 0.5,
+              "multi_timeframe_signal": "N/A",
+              "history_score": 0.5,
+              "historical_match": false,
+              "keyword_score": 1.0,
+              "composite_score": 0.559
+            },
+            "timestamp": "2026-05-29T20:22:05.311919"
+          }
+        ],
+        "timestamp": "2026-05-29T20:22:05.316751"
+      },
+      "execution": [
+        {
+          "batch_id": "test_20260529_202156",
+          "execution_id": "exec_20260529_202205",
+          "decision_id": "dec_20260529_202159_110011",
+          "action": "hold",
+          "fund_code": "110011",
+          "fund_name": "易方达中小盘混合",
+          "amount": 0,
+          "price": 0,
+          "shares": 0,
+          "status": "hold",
+          "reason": "继续持有",
+          "timestamp": "2026-05-29T20:22:05.363364"
+        },
+        {
+          "batch_id": "test_20260529_202156",
+          "execution_id": "exec_20260529_202205",
+          "decision_id": "dec_20260529_202200_161725",
+          "action": "buy",
+          "fund_code": "161725",
+          "fund_name": "招商中证白酒指数",
+          "amount": 300.0,
+          "price": 0.5882,
+          "shares": 510.03,
+          "status": "executed",
+          "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+          "confidence": 0.609,
+          "timestamp": "2026-05-29T20:22:05.590766"
+        },
+        {
+          "batch_id": "test_20260529_202156",
+          "execution_id": "exec_20260529_202205",
+          "decision_id": "dec_20260529_202201_110020",
+          "action": "buy",
+          "fund_code": "110020",
+          "fund_name": "易方达沪深300ETF联接",
+          "amount": 100.0,
+          "price": 1.9694,
+          "shares": 50.78,
+          "status": "executed",
+          "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+          "confidence": 0.589,
+          "timestamp": "2026-05-29T20:22:05.685615"
+        },
+        {
+          "batch_id": "test_20260529_202156",
+          "execution_id": "exec_20260529_202205",
+          "decision_id": "dec_20260529_202202_014881",
+          "action": "hold",
+          "fund_code": "014881",
+          "fund_name": "天弘中证机器人ETF联接C",
+          "amount": 0,
+          "price": 0,
+          "shares": 0,
+          "status": "hold",
+          "reason": "继续持有",
+          "timestamp": "2026-05-29T20:22:05.708051"
+        },
+        {
+          "batch_id": "test_20260529_202156",
+          "execution_id": "exec_20260529_202205",
+          "decision_id": "dec_20260529_202203_001156",
+          "action": "hold",
+          "fund_code": "001156",
+          "fund_name": "申万菱信新能源汽车",
+          "amount": 0,
+          "price": 0,
+          "shares": 0,
+          "status": "hold",
+          "reason": "继续持有",
+          "timestamp": "2026-05-29T20:22:05.714784"
+        },
+        {
+          "batch_id": "test_20260529_202156",
+          "execution_id": "exec_20260529_202205",
+          "decision_id": "dec_20260529_202204_003095",
+          "action": "hold",
+          "fund_code": "003095",
+          "fund_name": "中欧医疗健康混合",
+          "amount": 0,
+          "price": 0,
+          "shares": 0,
+          "status": "hold",
+          "reason": "继续持有",
+          "timestamp": "2026-05-29T20:22:05.720733"
+        },
+        {
+          "batch_id": "test_20260529_202156",
+          "execution_id": "exec_20260529_202205",
+          "decision_id": "dec_20260529_202205_005827",
+          "action": "hold",
+          "fund_code": "005827",
+          "fund_name": "易方达蓝筹精选混合",
+          "amount": 0,
+          "price": 0,
+          "shares": 0,
+          "status": "hold",
+          "reason": "继续持有",
+          "timestamp": "2026-05-29T20:22:05.726952"
+        }
+      ],
+      "feedback": {
+        "status": "collected"
+      },
+      "learning": {
+        "status": "completed"
+      }
+    }
+  ]
+}

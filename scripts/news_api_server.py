@@ -207,7 +207,20 @@ class NewsHandler(BaseHTTPRequestHandler):
             from execution_engine import ExecutionEngine
             executor = ExecutionEngine(str(config.config_path) if hasattr(config, 'config_path') else None)
             portfolio = executor.get_portfolio_summary()
-            self._send_json(200, portfolio)
+            
+            # 数据结构转换 - 适配前端期望的格式
+            transformed = {'holdings': []}
+            if portfolio and 'holdings' in portfolio:
+                for h in portfolio['holdings']:
+                    avg_cost = h['total_invested'] / h['total_shares'] if h['total_shares'] > 0 else 0
+                    transformed['holdings'].append({
+                        'fund_code': h['fund_code'],
+                        'fund_name': h.get('fund_name', h['fund_code']),
+                        'shares': h['total_shares'],
+                        'avg_cost': avg_cost,
+                        'current_nav': h['current_nav']
+                    })
+            self._send_json(200, transformed)
         except Exception as e:
             import traceback
             print(f"Error fetching portfolio: {e}")
@@ -217,10 +230,21 @@ class NewsHandler(BaseHTTPRequestHandler):
     def _handle_decisions(self, params):
         try:
             from knowledge_manager import KnowledgeManager
-            knowledge = KnowledgeManager(str(config.config_path) if hasattr(config, 'config_path') else None)
-            limit = int(params.get('limit', [20])[0])
-            decisions = knowledge.get_recent_decisions(limit=limit)
-            self._send_json(200, {'decisions': decisions})
+            knowledge = KnowledgeManager()  # 使用默认路径
+            days = int(params.get('days', [30])[0])
+            decisions = knowledge.get_recent_decisions(days=days)
+            
+            # 转换为前端期望的格式（添加 score 字段）
+            transformed = []
+            for d in decisions:
+                transformed.append({
+                    'fund_code': d['fund_code'],
+                    'action': d['action'],
+                    'score': d.get('confidence', 0.5),
+                    'date': d['timestamp'],
+                    'reason': d.get('reason', '')
+                })
+            self._send_json(200, {'decisions': transformed})
         except Exception as e:
             import traceback
             print(f"Error fetching decisions: {e}")
@@ -244,8 +268,8 @@ class NewsHandler(BaseHTTPRequestHandler):
                 stats['total_funds'] = len(holdings)
                 total_cost = 0
                 for h in holdings:
-                    market_value = h.get('shares', 0) * h.get('current_nav', 0)
-                    cost_value = h.get('shares', 0) * h.get('avg_cost', 0)
+                    market_value = h.get('current_value', 0)
+                    cost_value = h.get('total_invested', 0)
                     stats['total_assets'] += market_value
                     total_cost += cost_value
                     stats['total_profit'] += (market_value - cost_value)

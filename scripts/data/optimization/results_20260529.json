@@ -1,0 +1,117 @@
+{
+  "timestamp": "2026-05-29T19:25:28.141593",
+  "results": [
+    {
+      "buy_threshold": 0.58,
+      "sell_threshold": 0.42,
+      "avg_excess_return": 5.251428571428572,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.58,
+      "sell_threshold": 0.5,
+      "avg_excess_return": 5.029999999999999,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.52,
+      "sell_threshold": 0.42,
+      "avg_excess_return": 4.981428571428572,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.55,
+      "sell_threshold": 0.42,
+      "avg_excess_return": 4.981428571428572,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.58,
+      "sell_threshold": 0.45,
+      "avg_excess_return": 4.941428571428572,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.58,
+      "sell_threshold": 0.48,
+      "avg_excess_return": 4.941428571428572,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.5,
+      "sell_threshold": 0.42,
+      "avg_excess_return": 4.904285714285714,
+      "win_rate": 0.5714285714285714,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.52,
+      "sell_threshold": 0.5,
+      "avg_excess_return": 4.780000000000001,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.55,
+      "sell_threshold": 0.5,
+      "avg_excess_return": 4.780000000000001,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.52,
+      "sell_threshold": 0.45,
+      "avg_excess_return": 4.694285714285714,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.52,
+      "sell_threshold": 0.48,
+      "avg_excess_return": 4.694285714285714,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.55,
+      "sell_threshold": 0.45,
+      "avg_excess_return": 4.694285714285714,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.55,
+      "sell_threshold": 0.48,
+      "avg_excess_return": 4.694285714285714,
+      "win_rate": 0.7142857142857143,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.5,
+      "sell_threshold": 0.45,
+      "avg_excess_return": 4.617142857142858,
+      "win_rate": 0.5714285714285714,
+      "fund_count": 7
+    },
+    {
+      "buy_threshold": 0.5,
+      "sell_threshold": 0.48,
+      "avg_excess_return": 4.617142857142858,
+      "win_rate": 0.5714285714285714,
+      "fund_count": 7
+    }
+  ],
+  "best_params": {
+    "buy_threshold": 0.58,
+    "sell_threshold": 0.42,
+    "avg_excess_return": 5.251428571428572,
+    "win_rate": 0.7142857142857143,
+    "fund_count": 7
+  }
+}

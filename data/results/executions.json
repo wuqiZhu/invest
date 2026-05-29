@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-05-28T09:07:01.870309",
+  "executions": [
+    {
+      "batch_id": "20260528_090428",
+      "execution_id": "exec_20260528_090701",
+      "decision_id": "dec_20260528_090700_110011",
+      "action": "hold",
+      "fund_code": "110011",
+      "fund_name": "易方达中小盘混合",
+      "amount": 0,
+      "price": 0,
+      "shares": 0,
+      "status": "hold",
+      "reason": "继续持有",
+      "timestamp": "2026-05-28T09:07:01.855880"
+    },
+    {
+      "batch_id": "20260528_090428",
+      "execution_id": "exec_20260528_090701",
+      "decision_id": "dec_20260528_090700_161725",
+      "action": "hold",
+      "fund_code": "161725",
+      "fund_name": "招商中证白酒指数",
+      "amount": 0,
+      "price": 0,
+      "shares": 0,
+      "status": "hold",
+      "reason": "继续持有",
+      "timestamp": "2026-05-28T09:07:01.863877"
+    },
+    {
+      "batch_id": "20260528_090428",
+      "execution_id": "exec_20260528_090701",
+      "decision_id": "dec_20260528_090700_110020",
+      "action": "hold",
+      "fund_code": "110020",
+      "fund_name": "易方达沪深300ETF联接",
+      "amount": 0,
+      "price": 0,
+      "shares": 0,
+      "status": "hold",
+      "reason": "继续持有",
+      "timestamp": "2026-05-28T09:07:01.870309"
+    }
+  ]
+}

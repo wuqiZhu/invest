@@ -1,0 +1,134 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-05-28T09:07:01.875746",
+  "batches": [
+    {
+      "batch_id": "20260528_090428",
+      "status": "executed",
+      "created_at": "2026-05-28T09:04:28.082927",
+      "updated_at": "2026-05-28T09:07:01.875746",
+      "priority": "high",
+      "data": {
+        "news_count": 150,
+        "sentiment_score": 0.78,
+        "key_themes": [
+          "央行降准",
+          "半导体上涨",
+          "消费回暖",
+          "牛市"
+        ],
+        "ai_summary": "央行宣布降准，市场情绪极度乐观，牛市信号明显"
+      },
+      "decision": {
+        "batch_id": "20260528_090428",
+        "decisions": [
+          {
+            "batch_id": "20260528_090428",
+            "decision_id": "dec_20260528_090700_110011",
+            "fund_code": "110011",
+            "fund_name": "易方达中小盘混合",
+            "action": "hold",
+            "confidence": 0.5,
+            "amount": 0,
+            "reason": "情绪指数=0.78, 关键主题=['央行降准', '半导体上涨', '消费回暖', '牛市']",
+            "factors": {
+              "sentiment_score": 0.78,
+              "technical_score": 0.5,
+              "technical_signal": "HOLD",
+              "history_score": 0.5,
+              "historical_match": false,
+              "keyword_score": 1.0,
+              "composite_score": 0.684
+            },
+            "timestamp": "2026-05-28T09:07:00.077073"
+          },
+          {
+            "batch_id": "20260528_090428",
+            "decision_id": "dec_20260528_090700_161725",
+            "fund_code": "161725",
+            "fund_name": "招商中证白酒指数",
+            "action": "hold",
+            "confidence": 0.5,
+            "amount": 0,
+            "reason": "情绪指数=0.78, 关键主题=['央行降准', '半导体上涨', '消费回暖', '牛市']",
+            "factors": {
+              "sentiment_score": 0.78,
+              "technical_score": 0.5,
+              "technical_signal": "HOLD",
+              "history_score": 0.5,
+              "historical_match": false,
+              "keyword_score": 1.0,
+              "composite_score": 0.684
+            },
+            "timestamp": "2026-05-28T09:07:00.077073"
+          },
+          {
+            "batch_id": "20260528_090428",
+            "decision_id": "dec_20260528_090700_110020",
+            "fund_code": "110020",
+            "fund_name": "易方达沪深300ETF联接",
+            "action": "hold",
+            "confidence": 0.5,
+            "amount": 0,
+            "reason": "情绪指数=0.78, 关键主题=['央行降准', '半导体上涨', '消费回暖', '牛市']",
+            "factors": {
+              "sentiment_score": 0.78,
+              "technical_score": 0.5,
+              "technical_signal": "HOLD",
+              "history_score": 0.5,
+              "historical_match": false,
+              "keyword_score": 1.0,
+              "composite_score": 0.684
+            },
+            "timestamp": "2026-05-28T09:07:00.077073"
+          }
+        ],
+        "timestamp": "2026-05-28T09:07:00.077073"
+      },
+      "executions": [
+        {
+          "batch_id": "20260528_090428",
+          "execution_id": "exec_20260528_090701",
+          "decision_id": "dec_20260528_090700_110011",
+          "action": "hold",
+          "fund_code": "110011",
+          "fund_name": "易方达中小盘混合",
+          "amount": 0,
+          "price": 0,
+          "shares": 0,
+          "status": "hold",
+          "reason": "继续持有",
+          "timestamp": "2026-05-28T09:07:01.855880"
+        },
+        {
+          "batch_id": "20260528_090428",
+          "execution_id": "exec_20260528_090701",
+          "decision_id": "dec_20260528_090700_161725",
+          "action": "hold",
+          "fund_code": "161725",
+          "fund_name": "招商中证白酒指数",
+          "amount": 0,
+          "price": 0,
+          "shares": 0,
+          "status": "hold",
+          "reason": "继续持有",
+          "timestamp": "2026-05-28T09:07:01.863877"
+        },
+        {
+          "batch_id": "20260528_090428",
+          "execution_id": "exec_20260528_090701",
+          "decision_id": "dec_20260528_090700_110020",
+          "action": "hold",
+          "fund_code": "110020",
+          "fund_name": "易方达沪深300ETF联接",
+          "amount": 0,
+          "price": 0,
+          "shares": 0,
+          "status": "hold",
+          "reason": "继续持有",
+          "timestamp": "2026-05-28T09:07:01.870309"
+        }
+      ]
+    }
+  ]
+}

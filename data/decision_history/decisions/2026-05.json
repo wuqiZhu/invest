@@ -1,0 +1,331 @@
+[
+  {
+    "decision_id": "dec_20260529_202159_110011",
+    "timestamp": "2026-05-29T20:21:59.627394",
+    "fund_code": "110011",
+    "fund_name": "易方达中小盘混合",
+    "action": "hold",
+    "confidence": 0.5,
+    "amount": 0,
+    "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+    "market_context": {
+      "date": "2026-05-29",
+      "market_trend": "neutral",
+      "volatility_index": 0.0,
+      "sentiment_score": 0.5,
+      "news_keywords": [],
+      "sector_performance": {}
+    },
+    "factor_scores": {
+      "sentiment": 0.5,
+      "technical": 0.5,
+      "multi_timeframe": 0.5,
+      "momentum": 0.5,
+      "volatility": 0.5,
+      "history": 0.5,
+      "keyword": 0.5,
+      "composite": 0.5
+    },
+    "technical_indicators": {
+      "ma5": 0.0,
+      "ma10": 0.0,
+      "ma20": 0.0,
+      "rsi": 50.0,
+      "macd": 0.0,
+      "bollinger_upper": 0.0,
+      "bollinger_lower": 0.0,
+      "current_nav": 0.0
+    },
+    "buy_threshold": 0.58,
+    "sell_threshold": 0.42,
+    "result": {
+      "status": "pending",
+      "profit_rate": null,
+      "hold_days": null,
+      "executed_at": null,
+      "completed_at": null
+    }
+  },
+  {
+    "decision_id": "dec_20260529_202200_161725",
+    "timestamp": "2026-05-29T20:22:00.655553",
+    "fund_code": "161725",
+    "fund_name": "招商中证白酒指数",
+    "action": "buy",
+    "confidence": 0.609,
+    "amount": 300,
+    "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+    "market_context": {
+      "date": "2026-05-29",
+      "market_trend": "neutral",
+      "volatility_index": 0.0,
+      "sentiment_score": 0.5,
+      "news_keywords": [],
+      "sector_performance": {}
+    },
+    "factor_scores": {
+      "sentiment": 0.5,
+      "technical": 0.5,
+      "multi_timeframe": 0.5,
+      "momentum": 0.5,
+      "volatility": 0.5,
+      "history": 0.5,
+      "keyword": 0.5,
+      "composite": 0.5
+    },
+    "technical_indicators": {
+      "ma5": 0.0,
+      "ma10": 0.0,
+      "ma20": 0.0,
+      "rsi": 50.0,
+      "macd": 0.0,
+      "bollinger_upper": 0.0,
+      "bollinger_lower": 0.0,
+      "current_nav": 0.0
+    },
+    "buy_threshold": 0.58,
+    "sell_threshold": 0.42,
+    "result": {
+      "status": "pending",
+      "profit_rate": null,
+      "hold_days": null,
+      "executed_at": null,
+      "completed_at": null
+    }
+  },
+  {
+    "decision_id": "dec_20260529_202201_110020",
+    "timestamp": "2026-05-29T20:22:01.565460",
+    "fund_code": "110020",
+    "fund_name": "易方达沪深300ETF联接",
+    "action": "buy",
+    "confidence": 0.589,
+    "amount": 100,
+    "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+    "market_context": {
+      "date": "2026-05-29",
+      "market_trend": "neutral",
+      "volatility_index": 0.0,
+      "sentiment_score": 0.5,
+      "news_keywords": [],
+      "sector_performance": {}
+    },
+    "factor_scores": {
+      "sentiment": 0.5,
+      "technical": 0.5,
+      "multi_timeframe": 0.5,
+      "momentum": 0.5,
+      "volatility": 0.5,
+      "history": 0.5,
+      "keyword": 0.5,
+      "composite": 0.5
+    },
+    "technical_indicators": {
+      "ma5": 0.0,
+      "ma10": 0.0,
+      "ma20": 0.0,
+      "rsi": 50.0,
+      "macd": 0.0,
+      "bollinger_upper": 0.0,
+      "bollinger_lower": 0.0,
+      "current_nav": 0.0
+    },
+    "buy_threshold": 0.58,
+    "sell_threshold": 0.42,
+    "result": {
+      "status": "pending",
+      "profit_rate": null,
+      "hold_days": null,
+      "executed_at": null,
+      "completed_at": null
+    }
+  },
+  {
+    "decision_id": "dec_20260529_202202_014881",
+    "timestamp": "2026-05-29T20:22:02.380725",
+    "fund_code": "014881",
+    "fund_name": "天弘中证机器人ETF联接C",
+    "action": "hold",
+    "confidence": 0.5,
+    "amount": 0,
+    "reason": "情绪指数=0.72, 技术信号=SELL, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+    "market_context": {
+      "date": "2026-05-29",
+      "market_trend": "neutral",
+      "volatility_index": 0.0,
+      "sentiment_score": 0.5,
+      "news_keywords": [],
+      "sector_performance": {}
+    },
+    "factor_scores": {
+      "sentiment": 0.5,
+      "technical": 0.5,
+      "multi_timeframe": 0.5,
+      "momentum": 0.5,
+      "volatility": 0.5,
+      "history": 0.5,
+      "keyword": 0.5,
+      "composite": 0.5
+    },
+    "technical_indicators": {
+      "ma5": 0.0,
+      "ma10": 0.0,
+      "ma20": 0.0,
+      "rsi": 50.0,
+      "macd": 0.0,
+      "bollinger_upper": 0.0,
+      "bollinger_lower": 0.0,
+      "current_nav": 0.0
+    },
+    "buy_threshold": 0.58,
+    "sell_threshold": 0.42,
+    "result": {
+      "status": "pending",
+      "profit_rate": null,
+      "hold_days": null,
+      "executed_at": null,
+      "completed_at": null
+    }
+  },
+  {
+    "decision_id": "dec_20260529_202203_001156",
+    "timestamp": "2026-05-29T20:22:03.576837",
+    "fund_code": "001156",
+    "fund_name": "申万菱信新能源汽车",
+    "action": "hold",
+    "confidence": 0.5,
+    "amount": 0,
+    "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+    "market_context": {
+      "date": "2026-05-29",
+      "market_trend": "neutral",
+      "volatility_index": 0.0,
+      "sentiment_score": 0.5,
+      "news_keywords": [],
+      "sector_performance": {}
+    },
+    "factor_scores": {
+      "sentiment": 0.5,
+      "technical": 0.5,
+      "multi_timeframe": 0.5,
+      "momentum": 0.5,
+      "volatility": 0.5,
+      "history": 0.5,
+      "keyword": 0.5,
+      "composite": 0.5
+    },
+    "technical_indicators": {
+      "ma5": 0.0,
+      "ma10": 0.0,
+      "ma20": 0.0,
+      "rsi": 50.0,
+      "macd": 0.0,
+      "bollinger_upper": 0.0,
+      "bollinger_lower": 0.0,
+      "current_nav": 0.0
+    },
+    "buy_threshold": 0.58,
+    "sell_threshold": 0.42,
+    "result": {
+      "status": "pending",
+      "profit_rate": null,
+      "hold_days": null,
+      "executed_at": null,
+      "completed_at": null
+    }
+  },
+  {
+    "decision_id": "dec_20260529_202204_003095",
+    "timestamp": "2026-05-29T20:22:04.464820",
+    "fund_code": "003095",
+    "fund_name": "中欧医疗健康混合",
+    "action": "hold",
+    "confidence": 0.5,
+    "amount": 0,
+    "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+    "market_context": {
+      "date": "2026-05-29",
+      "market_trend": "neutral",
+      "volatility_index": 0.0,
+      "sentiment_score": 0.5,
+      "news_keywords": [],
+      "sector_performance": {}
+    },
+    "factor_scores": {
+      "sentiment": 0.5,
+      "technical": 0.5,
+      "multi_timeframe": 0.5,
+      "momentum": 0.5,
+      "volatility": 0.5,
+      "history": 0.5,
+      "keyword": 0.5,
+      "composite": 0.5
+    },
+    "technical_indicators": {
+      "ma5": 0.0,
+      "ma10": 0.0,
+      "ma20": 0.0,
+      "rsi": 50.0,
+      "macd": 0.0,
+      "bollinger_upper": 0.0,
+      "bollinger_lower": 0.0,
+      "current_nav": 0.0
+    },
+    "buy_threshold": 0.58,
+    "sell_threshold": 0.42,
+    "result": {
+      "status": "pending",
+      "profit_rate": null,
+      "hold_days": null,
+      "executed_at": null,
+      "completed_at": null
+    }
+  },
+  {
+    "decision_id": "dec_20260529_202205_005827",
+    "timestamp": "2026-05-29T20:22:05.311919",
+    "fund_code": "005827",
+    "fund_name": "易方达蓝筹精选混合",
+    "action": "hold",
+    "confidence": 0.5,
+    "amount": 0,
+    "reason": "情绪指数=0.72, 技术信号=HOLD, 关键主题=['央行降准', '半导体上涨', '消费回暖']",
+    "market_context": {
+      "date": "2026-05-29",
+      "market_trend": "neutral",
+      "volatility_index": 0.0,
+      "sentiment_score": 0.5,
+      "news_keywords": [],
+      "sector_performance": {}
+    },
+    "factor_scores": {
+      "sentiment": 0.5,
+      "technical": 0.5,
+      "multi_timeframe": 0.5,
+      "momentum": 0.5,
+      "volatility": 0.5,
+      "history": 0.5,
+      "keyword": 0.5,
+      "composite": 0.5
+    },
+    "technical_indicators": {
+      "ma5": 0.0,
+      "ma10": 0.0,
+      "ma20": 0.0,
+      "rsi": 50.0,
+      "macd": 0.0,
+      "bollinger_upper": 0.0,
+      "bollinger_lower": 0.0,
+      "current_nav": 0.0
+    },
+    "buy_threshold": 0.58,
+    "sell_threshold": 0.42,
+    "result": {
+      "status": "pending",
+      "profit_rate": null,
+      "hold_days": null,
+      "executed_at": null,
+      "completed_at": null
+    }
+  }
+]
