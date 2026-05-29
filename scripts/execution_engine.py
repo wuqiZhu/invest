@@ -409,7 +409,11 @@ class ExecutionEngine:
                 current_value = total_shares * current_nav
                 profit_rate = (current_value - total_invested) / total_invested * 100
 
-                if profit_rate >= take_profit:
+                dynamic_threshold = self.get_dynamic_threshold(fund_code)
+                fund_take_profit = dynamic_threshold['take_profit']
+                fund_stop_loss = dynamic_threshold['stop_loss']
+
+                if profit_rate >= fund_take_profit:
                     alerts.append({
                         'fund_code': fund_code,
                         'action': 'take_profit',
@@ -418,7 +422,7 @@ class ExecutionEngine:
                         'total_invested': round(total_invested, 2),
                         'message': f'{fund_code} 盈利{profit_rate:.1f}%，建议止盈'
                     })
-                elif profit_rate <= stop_loss:
+                elif profit_rate <= fund_stop_loss:
                     alerts.append({
                         'fund_code': fund_code,
                         'action': 'stop_loss',
@@ -431,6 +435,41 @@ class ExecutionEngine:
             return alerts
         except Exception:
             return []
+
+    def get_dynamic_threshold(self, fund_code):
+        """根据波动率动态调整止盈止损阈值"""
+        if not self.fetcher:
+            return {'take_profit': 20, 'stop_loss': -10}
+
+        try:
+            from datetime import datetime, timedelta
+            end_date = datetime.now().strftime('%Y-%m-%d')
+            start_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+            df = self.fetcher.get_fund_nav(fund_code, start_date, end_date)
+
+            if df is None or df.empty or len(df) < 10:
+                return {'take_profit': 20, 'stop_loss': -10}
+
+            navs = df['单位净值'].values
+            returns = []
+            for i in range(1, len(navs)):
+                if navs[i-1] > 0:
+                    returns.append((navs[i] - navs[i-1]) / navs[i-1])
+
+            if not returns:
+                return {'take_profit': 20, 'stop_loss': -10}
+
+            volatility = (sum(r**2 for r in returns) / len(returns)) ** 0.5
+
+            if volatility > 0.03:
+                return {'take_profit': 25, 'stop_loss': -15}
+            elif volatility > 0.02:
+                return {'take_profit': 20, 'stop_loss': -10}
+            else:
+                return {'take_profit': 15, 'stop_loss': -8}
+
+        except Exception:
+            return {'take_profit': 20, 'stop_loss': -10}
 
     def get_portfolio_summary(self):
         """
