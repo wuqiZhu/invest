@@ -847,6 +847,144 @@ class FundAnalyzerV2:
         
         return mistakes
     
+    def analyze_multi_timeframe(self, fund_data, fund_code=""):
+        """
+        多时间框架分析
+        综合日线、周线、月线信号
+        
+        Args:
+            fund_data: 基金净值数据
+            fund_code: 基金代码
+        
+        Returns:
+            dict: 多时间框架分析结果
+        """
+        if fund_data.empty or len(fund_data) < 60:
+            return {'error': '数据不足，无法进行多时间框架分析'}
+        
+        nav_series = fund_data['单位净值']
+        
+        daily_analysis = self._analyze_single_timeframe(nav_series, '日线')
+        
+        weekly_nav = nav_series.resample('W').last().dropna()
+        weekly_analysis = self._analyze_single_timeframe(weekly_nav, '周线') if len(weekly_nav) >= 20 else None
+        
+        monthly_nav = nav_series.resample('M').last().dropna()
+        monthly_analysis = self._analyze_single_timeframe(monthly_nav, '月线') if len(monthly_nav) >= 10 else None
+        
+        signals = []
+        if daily_analysis:
+            signals.append(daily_analysis.get('signal', 0))
+        if weekly_analysis:
+            signals.append(weekly_analysis.get('signal', 0))
+        if monthly_analysis:
+            signals.append(monthly_analysis.get('signal', 0))
+        
+        avg_signal = sum(signals) / len(signals) if signals else 0
+        
+        if avg_signal >= 0.6:
+            overall_signal = '强烈看多'
+            recommendation = '多个时间框架均显示上升趋势，可考虑加仓'
+        elif avg_signal >= 0.4:
+            overall_signal = '偏多'
+            recommendation = '整体趋势向上，可继续持有或定投'
+        elif avg_signal >= -0.2:
+            overall_signal = '中性'
+            recommendation = '信号不明确，建议观望'
+        elif avg_signal >= -0.4:
+            overall_signal = '偏空'
+            recommendation = '趋势偏弱，谨慎操作'
+        else:
+            overall_signal = '强烈看空'
+            recommendation = '多个时间框架均显示下降趋势，注意风险'
+        
+        return {
+            'fund_code': fund_code,
+            'daily': daily_analysis,
+            'weekly': weekly_analysis,
+            'monthly': monthly_analysis,
+            'avg_signal': round(avg_signal, 3),
+            'overall_signal': overall_signal,
+            'recommendation': recommendation,
+            'timeframes_used': len(signals)
+        }
+    
+    def _analyze_single_timeframe(self, nav_series, timeframe_name):
+        """
+        分析单一时间框架
+        
+        Args:
+            nav_series: 净值序列
+            timeframe_name: 时间框架名称
+        
+        Returns:
+            dict: 分析结果
+        """
+        if len(nav_series) < 10:
+            return None
+        
+        result = {'timeframe': timeframe_name}
+        
+        ma5 = nav_series.rolling(5).mean().iloc[-1] if len(nav_series) >= 5 else None
+        ma10 = nav_series.rolling(10).mean().iloc[-1] if len(nav_series) >= 10 else None
+        ma20 = nav_series.rolling(20).mean().iloc[-1] if len(nav_series) >= 20 else None
+        
+        current = nav_series.iloc[-1]
+        
+        signal = 0
+        reasons = []
+        
+        if ma5 and current > ma5:
+            signal += 0.2
+            reasons.append('价格在MA5上方')
+        elif ma5:
+            signal -= 0.2
+            reasons.append('价格在MA5下方')
+        
+        if ma10 and current > ma10:
+            signal += 0.2
+            reasons.append('价格在MA10上方')
+        elif ma10:
+            signal -= 0.2
+            reasons.append('价格在MA10下方')
+        
+        if ma5 and ma10 and ma5 > ma10:
+            signal += 0.2
+            reasons.append('MA5在MA10上方(金叉)')
+        elif ma5 and ma10:
+            signal -= 0.2
+            reasons.append('MA5在MA10下方(死叉)')
+        
+        if ma20 and current > ma20:
+            signal += 0.2
+            reasons.append('价格在MA20上方')
+        elif ma20:
+            signal -= 0.2
+            reasons.append('价格在MA20下方')
+        
+        if len(nav_series) >= 5:
+            recent_return = (nav_series.iloc[-1] / nav_series.iloc[-5] - 1) * 100
+            result['recent_return'] = round(recent_return, 2)
+            if recent_return > 2:
+                signal += 0.2
+                reasons.append(f'近期上涨{recent_return:.1f}%')
+            elif recent_return < -2:
+                signal -= 0.2
+                reasons.append(f'近期下跌{abs(recent_return):.1f}%')
+        
+        signal = max(-1, min(1, signal))
+        
+        result.update({
+            'current_price': round(current, 4),
+            'ma5': round(ma5, 4) if ma5 else None,
+            'ma10': round(ma10, 4) if ma10 else None,
+            'ma20': round(ma20, 4) if ma20 else None,
+            'signal': round(signal, 3),
+            'reasons': reasons
+        })
+        
+        return result
+
     def what_if_dca(self, fund_data, monthly_amount=500, years=3):
         """
         假设定投分析

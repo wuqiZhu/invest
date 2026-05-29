@@ -260,13 +260,24 @@ class DecisionEngine:
                 return {'signal': 'HOLD', 'available': False}
 
             result = self.trading_system.get_signal(fund_data, fund_code)
+            
+            multi_tf = self._get_multi_timeframe_analysis(fund_data, fund_code)
+            
             return {
                 'signal': result.get('signal', 'HOLD'),
                 'modules': result.get('modules', {}),
+                'multi_timeframe': multi_tf,
                 'available': True
             }
         except Exception as e:
             return {'signal': 'HOLD', 'available': False, 'error': str(e)}
+    
+    def _get_multi_timeframe_analysis(self, fund_data, fund_code):
+        try:
+            analyzer = FundAnalyzer()
+            return analyzer.analyze_multi_timeframe(fund_data, fund_code)
+        except Exception:
+            return None
 
     def _calculate_momentum(self, fund_code):
         if not self.fetcher:
@@ -336,6 +347,12 @@ class DecisionEngine:
 
         momentum_score = indicators.get('momentum_score', 0.5)
         volatility_score = indicators.get('volatility_score', 0.5)
+        
+        multi_tf = tech_signals.get('multi_timeframe', {})
+        multi_tf_score = 0.5
+        if multi_tf and 'avg_signal' in multi_tf:
+            multi_tf_score = 0.5 + multi_tf['avg_signal'] * 0.5
+            multi_tf_score = max(0, min(1, multi_tf_score))
 
         history_score = 0.5
         historical_match = False
@@ -354,9 +371,10 @@ class DecisionEngine:
                 history_score = min(max(0.5 + avg_profit * 5, 0), 1)
 
         composite = (
-            sentiment * 0.25 +
-            tech_score * 0.25 +
-            momentum_score * 0.20 +
+            sentiment * 0.20 +
+            tech_score * 0.20 +
+            multi_tf_score * 0.15 +
+            momentum_score * 0.15 +
             volatility_score * 0.10 +
             history_score * 0.10 +
             keyword * 0.10
@@ -375,6 +393,8 @@ class DecisionEngine:
         reason_parts = [f'情绪指数={sentiment:.2f}']
         if tech_signals.get('available'):
             reason_parts.append(f'技术信号={tech_signal}')
+        if multi_tf and multi_tf.get('overall_signal'):
+            reason_parts.append(f'多时间框架={multi_tf["overall_signal"]}')
         if indicators.get('key_themes'):
             reason_parts.append(f'关键主题={indicators["key_themes"]}')
 
@@ -386,6 +406,8 @@ class DecisionEngine:
                 'sentiment_score': round(sentiment, 4),
                 'technical_score': round(tech_score, 4),
                 'technical_signal': tech_signal,
+                'multi_timeframe_score': round(multi_tf_score, 4),
+                'multi_timeframe_signal': multi_tf.get('overall_signal', 'N/A') if multi_tf else 'N/A',
                 'history_score': round(history_score, 4),
                 'historical_match': historical_match,
                 'keyword_score': round(keyword, 4),
