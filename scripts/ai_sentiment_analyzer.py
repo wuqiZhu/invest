@@ -31,7 +31,7 @@ class AISentimentAnalyzer:
     def __init__(self, api_key: str = None, api_base: str = None, model: str = None):
         self.api_key = api_key or os.environ.get("MIMO_API_KEY", "")
         self.api_base = api_base or os.environ.get("MIMO_API_BASE", "https://token-plan-cn.xiaomimimo.com/v1")
-        self.model = model or os.environ.get("MIMO_MODEL", "openai/mimo-v2.5-pro")
+        self.model = model or os.environ.get("MIMO_MODEL", "mimo-v2.5-pro")
 
     def analyze_single(self, title: str, content: str = "") -> Dict[str, Any]:
         """

@@ -33,7 +33,7 @@ class DeepSeekCostTracker:
         self.daily_spend = defaultdict(float)
         self.today = date.today().isoformat()
 
-    def add_cost(self, prompt_tokens, completion_tokens, model="deepseek-chat"):
+    def add_cost(self, prompt_tokens, completion_tokens, model="mimo-v2.5-pro"):
         cost = (prompt_tokens / 1_000_000) * 1.0 + (completion_tokens / 1_000_000) * 2.0
         with self.lock:
             self.daily_spend[self.today] += cost

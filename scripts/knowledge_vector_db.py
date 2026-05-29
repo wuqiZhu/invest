@@ -30,7 +30,7 @@ class KnowledgeVectorDB:
         )
         self.api_key = api_key or os.environ.get('MIMO_API_KEY', '')
         self.api_base = api_base or os.environ.get('MIMO_API_BASE', 'https://token-plan-cn.xiaomimimo.com/v1')
-        self.model = model or os.environ.get('MIMO_MODEL', 'openai/mimo-v2.5-pro')
+        self.model = model or os.environ.get('MIMO_MODEL', 'mimo-v2.5-pro')
 
         if not self.api_base.endswith('/v1'):
             self.api_base = self.api_base.rstrip('/') + '/v1'
