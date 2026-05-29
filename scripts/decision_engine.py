@@ -85,7 +85,10 @@ class DecisionEngine:
             return {'safe': True, 'drawdown': 0}
 
         try:
-            fund_data = self.fetcher.get_fund_nav(fund_code, days=90)
+            from datetime import datetime, timedelta
+            end_date = datetime.now().strftime('%Y-%m-%d')
+            start_date = (datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d')
+            fund_data = self.fetcher.get_fund_nav(fund_code, start_date, end_date)
             if fund_data is None or fund_data.empty:
                 return {'safe': True, 'drawdown': 0}
 
@@ -249,7 +252,10 @@ class DecisionEngine:
             return {'signal': 'HOLD', 'available': False}
 
         try:
-            fund_data = self.fetcher.get_fund_nav(fund_code, days=180)
+            from datetime import datetime, timedelta
+            end_date = datetime.now().strftime('%Y-%m-%d')
+            start_date = (datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')
+            fund_data = self.fetcher.get_fund_nav(fund_code, start_date, end_date)
             if fund_data is None or fund_data.empty:
                 return {'signal': 'HOLD', 'available': False}
 
@@ -259,15 +265,18 @@ class DecisionEngine:
                 'modules': result.get('modules', {}),
                 'available': True
             }
-        except Exception:
-            return {'signal': 'HOLD', 'available': False}
+        except Exception as e:
+            return {'signal': 'HOLD', 'available': False, 'error': str(e)}
 
     def _calculate_momentum(self, fund_code):
         if not self.fetcher:
             return {'momentum_score': 0.5, 'volatility_score': 0.5}
 
         try:
-            fund_data = self.fetcher.get_fund_nav(fund_code, days=60)
+            from datetime import datetime, timedelta
+            end_date = datetime.now().strftime('%Y-%m-%d')
+            start_date = (datetime.now() - timedelta(days=60)).strftime('%Y-%m-%d')
+            fund_data = self.fetcher.get_fund_nav(fund_code, start_date, end_date)
             if fund_data is None or fund_data.empty:
                 return {'momentum_score': 0.5, 'volatility_score': 0.5}
 
