@@ -57,6 +57,18 @@ class NewsHandler(BaseHTTPRequestHandler):
         elif parsed.path == '/api/sentiment/summary':
             self._handle_sentiment_summary(params)
 
+        elif parsed.path == '/api/portfolio':
+            self._handle_portfolio(params)
+
+        elif parsed.path == '/api/decisions':
+            self._handle_decisions(params)
+
+        elif parsed.path == '/api/stats':
+            self._handle_stats(params)
+
+        elif parsed.path == '/':
+            self._handle_dashboard()
+
         else:
             self._send_json(404, {'error': 'Not Found'})
 
@@ -189,6 +201,68 @@ class NewsHandler(BaseHTTPRequestHandler):
         days = int(params.get('days', [7])[0])
         summary = db.get_sentiment_summary(days)
         self._send_json(200, summary)
+
+    def _handle_portfolio(self, params):
+        try:
+            from execution_engine import ExecutionEngine
+            executor = ExecutionEngine(config)
+            portfolio = executor.get_portfolio_summary()
+            self._send_json(200, portfolio)
+        except Exception as e:
+            self._send_json(200, {'holdings': [], 'error': str(e)})
+
+    def _handle_decisions(self, params):
+        try:
+            from knowledge_manager import KnowledgeManager
+            knowledge = KnowledgeManager(config)
+            limit = int(params.get('limit', [20])[0])
+            decisions = knowledge.get_recent_decisions(limit=limit)
+            self._send_json(200, {'decisions': decisions})
+        except Exception as e:
+            self._send_json(200, {'decisions': [], 'error': str(e)})
+
+    def _handle_stats(self, params):
+        try:
+            stats = {
+                'total_funds': 0,
+                'total_assets': 0,
+                'total_profit': 0,
+                'profit_rate': 0,
+                'last_update': datetime.now().isoformat()
+            }
+            try:
+                from execution_engine import ExecutionEngine
+                executor = ExecutionEngine(config)
+                portfolio = executor.get_portfolio_summary()
+                holdings = portfolio.get('holdings', [])
+                stats['total_funds'] = len(holdings)
+                for h in holdings:
+                    market_value = h.get('shares', 0) * h.get('current_nav', 0)
+                    cost_value = h.get('shares', 0) * h.get('avg_cost', 0)
+                    stats['total_assets'] += market_value
+                    stats['total_profit'] += (market_value - cost_value)
+                if stats['total_assets'] > 0:
+                    stats['profit_rate'] = stats['total_profit'] / (stats['total_assets'] - stats['total_profit']) * 100
+            except Exception:
+                pass
+            self._send_json(200, stats)
+        except Exception as e:
+            self._send_json(500, {'error': str(e)})
+
+    def _handle_dashboard(self):
+        try:
+            dashboard_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboard.html')
+            if os.path.exists(dashboard_path):
+                with open(dashboard_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(content.encode('utf-8'))
+            else:
+                self._send_json(404, {'error': 'Dashboard not found'})
+        except Exception as e:
+            self._send_json(500, {'error': str(e)})
 
     def _send_json(self, status_code, data):
         self.send_response(status_code)
